@@ -1,24 +1,7 @@
-<template>
-  <div class="flex items-center justify-center rounded-5px p-1% w-1/3 h-1/3">
-    <div
-      class="cell"
-      :class="[
-        isSelected ? 'c-[#fff] bg-teal-500' : '',
-        isSameGroup ? 'bg-[#eee]' : ' bg-[#fff]',
-        isHighlightDigit ? 'c-[#fff] bg-teal-500' : '',
-        isError ? 'c-red-700' : '',
-      ]"
-      @click="select"
-    >
-      {{ digit === 0 ? "" : digit }}
-    </div>
-  </div>
-</template>
-
 <script setup>
 defineOptions({
-  name: "Cell",
-});
+  name: 'Cell',
+})
 const props = defineProps({
   digit: {
     type: Number,
@@ -40,96 +23,128 @@ const props = defineProps({
     default: () => [],
   },
   // 所在行
-  // row: {
-  //   type: Number,
-  //   default: 0,
-  // },
+  row: {
+    type: Number,
+    default: 0,
+  },
   // 所在列
-  // col: {
-  //   type: Number,
-  //   default: 0,
-  // },
+  col: {
+    type: Number,
+    default: 0,
+  },
   // 所在宫
   box: {
     type: Number,
     default: 0,
   },
-  // 所在行和列
-  rowCol: {
-    type: Object,
-    default: () => {
-      return {
-        row: 0,
-        col: 0,
-      };
-    },
+  isOriginal: {
+    type: Boolean,
+    default: false,
   },
-});
-const emit = defineEmits(["select"]);
+  // 所在行和列
+  // rowCol: {
+  //   type: Object,
+  //   default: () => {
+  //     return {
+  //       row: 0,
+  //       col: 0,
+  //     }
+  //   },
+  // },
+})
+const emit = defineEmits(['select'])
 
 const isSelected = computed(() => {
   return (
-    props.rowCol.row === props.selectedPosition.row &&
-    props.rowCol.col === props.selectedPosition.col &&
-    props.box === props.selectedPosition.block
-  );
-});
+    props.row === props.selectedPosition.row
+    && props.col === props.selectedPosition.col
+    && props.box === props.selectedPosition.block
+  )
+})
 
 const isEmpty = computed(() => {
-  return props.digit === 0;
-});
-
-/**
- * 如果同行或同列或同宫中有同样的数字，则出错，样式标红
- */
-const isError = computed(() => {
-  if (isSelected.value) {
-    return false;
-  }
-  if (props.digit === props.highlightDigit && isSameGroup.value) {
-    return true;
-  } else {
-    return false;
-  }
-});
-
-const isHighlightDigit = computed(() => {
-  if (props.highlightDigit === 0) return false;
-  return props.highlightDigit === props.digit;
-});
+  return props.digit === 0
+})
 
 /**
  * 是否和选中的数字在同一行或者同一列或者同一宫
  */
 const isSameGroup = computed(() => {
   return (
-    props.rowCol.row === props.selectedPosition.row ||
-    props.rowCol.col === props.selectedPosition.col ||
-    props.box === props.selectedPosition.block
-  );
-});
-const select = () => {
+    props.row === props.selectedPosition.row
+    || props.col === props.selectedPosition.col
+    || props.box === props.selectedPosition.block
+  )
+})
+
+/**
+ * 如果同行或同列或同宫中有同样的数字，则出错，样式标红
+ */
+const isError = computed(() => {
+  if (props.digit === 0)
+    return false
+
+  if (isSelected.value)
+    return false
+
+  if (props.digit === props.highlightDigit && isSameGroup.value)
+    return true
+  else
+    return false
+})
+
+const isHighlightDigit = computed(() => {
+  if (props.highlightDigit === 0)
+    return false
+  return props.highlightDigit === props.digit
+})
+
+function select() {
   if (isSelected.value) {
-    emit("select", 0, {
+    emit('select', 0, {
       block: 0,
       row: 0,
       col: 0,
-    });
-  } else {
-    emit("select", props.digit, {
-      block: props.box,
-      row: props.rowCol.row,
-      col: props.rowCol.col,
-    });
+    })
   }
-};
+  else {
+    emit('select', props.digit, {
+      block: props.box,
+      row: props.row,
+      col: props.col,
+    })
+  }
+}
 </script>
+
+<template>
+  <div class="h-1/3 w-1/3 flex items-center justify-center rounded-5px p-1%">
+    <div
+      class="cell"
+      :class="[
+        isSameGroup ? 'bg-[#eee] dark:bg-[#222]:70' : ' bg-[#fff] dark:bg-[#222]:90',
+        isHighlightDigit ? 'c-[#fff]! bg-teal-500 dark:bg-teal-600' : '',
+        isError ? 'c-red-700' : '',
+        isOriginal ? '' : 'c-blue-600 dark:c-sky-400',
+        isSelected ? 'c-[#fff]! bg-teal-500 dark:bg-teal-600' : '',
+      ]"
+      @click="select"
+    >
+      <template v-if="!isOriginal && candidates.length > 0">
+        <Candidate :candidates="candidates" :highlightDigit="highlightDigit" />
+      </template>
+      <template v-else>
+        {{ digit === 0 ? "" : digit }}
+      </template>
+    </div>
+  </div>
+</template>
 
 <style>
 .cell {
-  --uno: flex items-center justify-center rounded-5px
-  w-full h-full
+  @apply flex items-center justify-center rounded-5px
+  w-full h-full text-[calc(4vmin)]
   select-none cursor-pointer
-   hover:bg-teal-500 hover:c-white;
+  hover:bg-teal-500 hover:c-white;
 }
 </style>

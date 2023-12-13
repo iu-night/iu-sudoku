@@ -1,20 +1,3 @@
-<template>
-  <div class="_block flex flex-wrap w-1/3 b-1">
-    <Cell
-      v-for="(cell, cellIndex) in sudokuBlockData"
-      :key="cellIndex"
-      :digit="cell"
-      :highlightDigit="highlightDigit"
-      :selectedPosition="selectedPosition"
-      :candidates="candidates"
-      :row="cellRow"
-      :col="cellCol"
-      :box="blockIndex"
-      @select="onClick"
-    ></Cell>
-  </div>
-</template>
-
 <script setup>
 defineProps({
   sudokuBlockData: {
@@ -45,13 +28,30 @@ defineProps({
     type: Number,
     default: 0,
   },
-});
+})
 
-const emit = defineEmits(["clickDigit"]);
+const emit = defineEmits(['clickDigit'])
 
-const onClick = (digit) => {
-  emit("clickDigit", digit);
-};
+function onClick(digit) {
+  emit('clickDigit', digit)
+}
 </script>
+
+<template>
+  <div class="_block w-1/3 flex flex-wrap b-1">
+    <Cell
+      v-for="(cell, cellIndex) in sudokuBlockData"
+      :key="cellIndex"
+      :digit="cell"
+      :highlight-digit="highlightDigit"
+      :selected-position="selectedPosition"
+      :candidates="candidates"
+      :row="cellRow"
+      :col="cellCol"
+      :box="blockIndex"
+      @select="onClick"
+    />
+  </div>
+</template>
 
 <style lang="scss" scoped></style>
