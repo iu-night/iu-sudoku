@@ -37,6 +37,11 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
+  // 宫内序号
+  boxPosition: {
+    type: Number,
+    default: 0,
+  },
   isOriginal: {
     type: Boolean,
     default: false,
@@ -79,6 +84,7 @@ const isSameGroup = computed(() => {
 
 /**
  * 如果同行或同列或同宫中有同样的数字，则出错，样式标红
+ * [//TODO) 需要判断当前的数字是否为源数据
  */
 const isError = computed(() => {
   if (props.digit === 0)
@@ -99,12 +105,39 @@ const isHighlightDigit = computed(() => {
   return props.highlightDigit === props.digit
 })
 
+const digitColor = computed(() => {
+  if (isError.value)
+    return 'c-red-700'
+
+  if (isSelected.value)
+    return 'c-[#fff]'
+
+  if (isHighlightDigit.value)
+    return 'c-[#fff]'
+
+  if (!props.isOriginal && props.digit !== 0)
+    return 'c-blue-600 dark:c-sky-400'
+
+  return ''
+})
+
+const digitBgcolor = computed(() => {
+  if (isSelected.value || isHighlightDigit.value)
+    return 'bg-teal-500 dark:bg-teal-600'
+  if (isSameGroup.value)
+    return 'bg-[#eee] dark:bg-[#222]:70'
+  else
+    return 'bg-[#fff] dark:bg-[#222]:90'
+})
+
 function select() {
   if (isSelected.value) {
     emit('select', 0, {
       block: 0,
       row: 0,
       col: 0,
+      boxPosition: 0,
+      isOriginal: true,
     })
   }
   else {
@@ -112,6 +145,8 @@ function select() {
       block: props.box,
       row: props.row,
       col: props.col,
+      boxPosition: props.boxPosition,
+      isOriginal: props.isOriginal,
     })
   }
 }
@@ -122,19 +157,20 @@ function select() {
     <div
       class="cell"
       :class="[
-        isSameGroup ? 'bg-[#eee] dark:bg-[#222]:70' : ' bg-[#fff] dark:bg-[#222]:90',
-        isHighlightDigit ? 'c-[#fff]! bg-teal-500 dark:bg-teal-600' : '',
-        isError ? 'c-red-700' : '',
-        isOriginal ? '' : 'c-blue-600 dark:c-sky-400',
-        isSelected ? 'c-[#fff]! bg-teal-500 dark:bg-teal-600' : '',
+        digitBgcolor,
+        digitColor,
       ]"
       @click="select"
     >
-      <template v-if="!isOriginal && candidates.length > 0">
-        <Candidate :candidates="candidates" :highlightDigit="highlightDigit" />
+      <template v-if="digit === 0">
+        <Candidate
+          v-if="candidates.length > 0"
+          :candidates="candidates"
+          :highlightDigit="highlightDigit"
+        />
       </template>
       <template v-else>
-        {{ digit === 0 ? "" : digit }}
+        {{ digit }}
       </template>
     </div>
   </div>

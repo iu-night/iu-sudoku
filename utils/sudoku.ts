@@ -5,6 +5,7 @@ interface Cell {
   value: number
   isOriginal: boolean
   candidates: number[]
+  boxPosition: number
 }
 type sudokuData = Cell[][]
 
@@ -53,13 +54,18 @@ export function convertStringToSudokuBoxes(sudokuString: string): sudokuData {
       const value = values[row * sudoSize + col]
       const boxIndex = Math.floor(row / boxSize) * boxSize + Math.floor(col / boxSize)
 
+      const boxRow = row % boxSize
+      const boxCol = col % boxSize
+      const boxPosition = boxRow * boxSize + boxCol
+
       boxes[boxIndex].push({
         id: `${row + 1}${col + 1}`, // 使用行列生成ID
         row: row + 1,
         col: col + 1,
         value,
         isOriginal: value !== 0, // 若值不为0，则是原始数据
-        candidates: [2, 4, 5, 6, 8, 9],
+        candidates: [],
+        boxPosition, // 此格在宫内的序号
       })
     }
   }

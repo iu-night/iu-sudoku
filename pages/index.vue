@@ -16,28 +16,87 @@ const sudokuData = ref([
 ])
 
 const blockData = ref(convertStringToSudokuBoxes(sudokuString))
-
 const highlightDigit = ref(0)
+const isMark = ref(false)
 
-const selectedCell = ref({ block: 0, row: 0, col: 0 })
+const selectedCell = ref({ block: 0, row: 0, col: 0, boxPosition: 0, isOriginal: true })
 const selectedPosition = computed(() => {
-  return {
-    block: selectedCell.value.block,
-    row: selectedCell.value.row,
-    col: selectedCell.value.col,
-  }
+  return selectedCell.value
 })
 
-function onClickDigit(digit, { block, row, col }) {
+onKeyStroke(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], (e) => {
+  modifySudoku(Number(e.key))
+})
+
+function onClickBottomNum(num) {
+  modifySudoku(num)
+}
+
+function onClickBottomCandidateNum(num) {
+  modifySudoku(num, true)
+}
+
+/**
+ * 修改数独数据中的value
+ * @param {object} param
+ * @param {number} param.blockIndex 宫的序号
+ * @param {number} param.cellIndex 宫内的cell的序号
+ * @param {number} digit
+ */
+function modifyCell({ blockIndex, cellIndex }, digit) {
+  blockData.value[blockIndex][cellIndex].value = digit
+  blockData.value[blockIndex][cellIndex].candidates = []
+  highlightDigit.value = digit
+}
+
+/**
+ * 修改数独数据中的候选数candidates
+ */
+function modifyCandidates({ blockIndex, cellIndex }, digit) {
+  blockData.value[blockIndex][cellIndex].value = 0
+  highlightDigit.value = 0
+  const arr = blockData.value[blockIndex][cellIndex].candidates
+  if (arr.includes(digit)) {
+    arr.splice(arr.indexOf(digit), 1)
+    blockData.value[blockIndex][cellIndex].candidates = arr
+  }
+  else {
+    blockData.value[blockIndex][cellIndex].candidates.push(digit)
+  }
+}
+
+/**
+ * 判断是否为标记模式，修改数独还是候选数
+ */
+function modifySudoku(key, clickCanNum = false) {
+  if (selectedCell.value.block === 0)
+    return
+  if (selectedCell.value.isOriginal)
+    return
+  if (isMark.value || clickCanNum) {
+    modifyCandidates({
+      blockIndex: selectedCell.value.block - 1,
+      cellIndex: selectedCell.value.boxPosition,
+    }, key)
+  }
+  else {
+    modifyCell({
+      blockIndex: selectedCell.value.block - 1,
+      cellIndex: selectedCell.value.boxPosition,
+    }, key)
+  }
+}
+
+function onClickDigit(digit, param) {
   highlightDigit.value = digit
 
-  selectedCell.value = { block, row, col }
+  selectedCell.value = param
 }
 </script>
 
 <template>
-  <div flex flex-col items-center pt-60px>
-    <div w-96vmin flex flex-col items-center sm:w-70vmin>
+  <div class="flex flex-col items-center pt-60px">
+    <div class="w-96vmin flex flex-col items-center sm:w-70vmin">
       <div class="relative mb-10px h-0px w-full pt-1/1">
         <div class="sudoku-container dark:bg-gray-500">
           <div
@@ -56,13 +115,36 @@ function onClickDigit(digit, { block, row, col }) {
               :row="cellData.row"
               :col="cellData.col"
               :isOriginal="cellData.isOriginal"
+              :box-position="cellData.boxPosition"
               @select="onClickDigit"
             />
           </div>
         </div>
       </div>
-      <DarkToggle />
-      <!-- <button @click="useRouter().push({ path: '/sudo' })">sudo</button> -->
+      <div class="flex-center">
+        <DarkToggle />
+        <div
+          class="ml-5px inline-flex-center cursor-pointer select-none b-1 rounded-5px px-4px py-3px text-[calc(3vmin)] transition ease-in-out"
+          :class="[isMark ? 'bg-teal-500 c-white' : '']"
+          @click="isMark = !isMark"
+        >
+          mark
+        </div>
+      </div>
+      <div class="mt-10px w-full flex items-center justify-around">
+        <button v-for="i in 9" :key="i" class="digit-btn" @click="onClickBottomNum(i)">
+          {{ i }}
+        </button>
+      </div>
+      <div class="mt-10px w-full flex items-center justify-around">
+        <button
+          v-for="i in 9" :key="`can${i}`" class="digit-btn italic"
+          :class="[isMark ? 'c-teal-500' : '']"
+          @click="onClickBottomCandidateNum(i)"
+        >
+          {{ i }}
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -72,13 +154,9 @@ function onClickDigit(digit, { block, row, col }) {
   --uno: absolute flex flex-wrap items-stretch flex-1 w-full h-full top-0 left-0
     b-1 overflow-hidden bg-gray-100;
 }
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type='number'] {
-  -moz-appearance: textfield;
+.digit-btn {
+  @apply mx-3px flex-center flex-1 cursor-pointer select-none b-1 rounded-5px py-4px
+  text-[calc(3.5vmin)]
+  active:bg-teal-500 active:c-white;
 }
 </style>
