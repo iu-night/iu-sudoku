@@ -1,5 +1,10 @@
 <script setup>
-import { convertStringToSudokuBoxes } from '~/utils/sudoku'
+import {
+  calculateCandidates,
+  calculateSelectedCandidates,
+  convertStringToSudokuBoxes,
+  isValidSudokuString,
+} from '~/utils/sudoku'
 
 // example data
 const sudokuString = '530070000600195000098000060800060003400803001700020006060000280000419005000080079'
@@ -18,6 +23,8 @@ const sudokuData = ref([
 const blockData = ref(convertStringToSudokuBoxes(sudokuString))
 const highlightDigit = ref(0)
 const isMark = ref(false)
+
+const inputValue = ref('')
 
 const selectedCell = ref({ block: 0, row: 0, col: 0, boxPosition: 0, isOriginal: true })
 const selectedPosition = computed(() => {
@@ -92,6 +99,33 @@ function onClickDigit(digit, param) {
 
   selectedCell.value = param
 }
+
+/**
+ * 计算空格子的候选数
+ */
+function onClickCalulateCandidates() {
+  const sudokuHasCandidates = calculateCandidates(blockData.value)
+  blockData.value = sudokuHasCandidates
+}
+
+/**
+ * 计算选中的空格子的候选数
+ */
+function onClickCalulateSelectedCandidates() {
+  if (selectedCell.value.isOriginal)
+    return
+  const sudokuHasCandidates = calculateSelectedCandidates(blockData.value, selectedCell.value)
+  blockData.value = sudokuHasCandidates
+}
+
+function onClickNewGame() {
+  if (isValidSudokuString(inputValue.value)) {
+    blockData.value = convertStringToSudokuBoxes(inputValue.value)
+    highlightDigit.value = 0
+    isMark.value = false
+    inputValue.value = ''
+  }
+}
 </script>
 
 <template>
@@ -123,12 +157,31 @@ function onClickDigit(digit, param) {
       </div>
       <div class="flex-center">
         <DarkToggle />
+        <input v-model="inputValue" class="b-1 rounded-5px">
+        <div
+          class="ml-5px inline-flex-center cursor-pointer select-none b-1 rounded-5px px-4px py-3px text-[calc(3vmin)]"
+          @click="onClickNewGame"
+        >
+          new
+        </div>
         <div
           class="ml-5px inline-flex-center cursor-pointer select-none b-1 rounded-5px px-4px py-3px text-[calc(3vmin)] transition ease-in-out"
           :class="[isMark ? 'bg-teal-500 c-white' : '']"
           @click="isMark = !isMark"
         >
           mark
+        </div>
+        <div
+          class="ml-5px inline-flex-center cursor-pointer select-none b-1 rounded-5px px-4px py-3px text-[calc(3vmin)]"
+          @click="onClickCalulateCandidates"
+        >
+          auto
+        </div>
+        <div
+          class="ml-5px inline-flex-center cursor-pointer select-none b-1 rounded-5px px-4px py-3px text-[calc(3vmin)]"
+          @click="onClickCalulateSelectedCandidates"
+        >
+          mark selected
         </div>
       </div>
       <div class="mt-10px w-full flex items-center justify-around">

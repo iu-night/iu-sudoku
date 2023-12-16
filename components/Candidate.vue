@@ -19,7 +19,11 @@ function isHighlight(candidate) {
 </script>
 
 <template>
-  <div v-if="candidates.length && !candidates.includes(0)" class="relative grid grid-cols-3 grid-rows-3 h-1/1 w-1/1 text-[calc(2vmin)]">
+  <div
+    v-if="candidates.length && !candidates.includes(0)"
+    class="relative grid grid-cols-3 grid-rows-3 h-1/1 w-1/1 text-[calc(2vmin)]"
+    :class="[candidates.length === 1 ? 'c-violet-600' : '']"
+  >
     <div
       v-for="candidate in candidates"
       :key="candidate"
