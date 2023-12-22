@@ -161,6 +161,38 @@ export function calculateSelectedCandidates(
 }
 
 /**
+ * 去掉选中的格子所在行、列、宫中的此格子数字的候选数
+ */
+export function removeSelectedDigitInCandidates(
+  sudo: sudokuData,
+  digit: number,
+  selectedCell: {
+    block: number
+    row: number
+    col: number
+    boxPosition: number
+    isOriginal: boolean
+  },
+) {
+  if (!sudo) {
+    console.error('sudo is undefined')
+    return
+  }
+  const { block, row, col } = selectedCell
+  return isCandidateInRowOrCol(
+    isCandidateInRowOrCol(
+      isCandidateInBlock(sudo, block - 1, digit),
+      digit,
+      row,
+      true,
+    ),
+    digit,
+    col,
+    false,
+  )
+}
+
+/**
  *  检查数字是否在行、列或宫内
  */
 function isNumberInRowOrCol(sudo: sudokuData, num: number, rowOrCol: number, isRow: boolean) {
@@ -173,6 +205,39 @@ function isNumberInBlock(sudo: sudokuData, blockIndex: number, num: number): boo
   return sudo[blockIndex].some(cell => cell.value === num)
 }
 
+/**
+ *  检查此数字是否在行、列或宫内的格子中的候选数中,如果在则删除此单个候选数
+ */
+function isCandidateInRowOrCol(sudo: sudokuData, num: number, rowOrCol: number, isRow: boolean) {
+  const { boxes, indices } = getBoxesAndIndices(rowOrCol - 1, isRow)
+
+  boxes.forEach(b => indices.forEach((i) => {
+    const canArr = sudo[b][i].candidates
+    if (canArr.includes(num)) {
+      canArr.splice(canArr.indexOf(num), 1)
+      sudo[b][i].candidates = canArr
+    }
+  }))
+  return sudo
+}
+
+function isCandidateInBlock(sudo: sudokuData, blockIndex: number, num: number) {
+  // return sudo[blockIndex].some(cell => cell.candidates.includes(num))
+  const cell = sudo[blockIndex]
+  cell.forEach((c) => {
+    const canArr = c.candidates
+    if (canArr.includes(num)) {
+      canArr.splice(canArr.indexOf(num), 1)
+      c.candidates = canArr
+    }
+  })
+  sudo[blockIndex] = cell
+  return sudo
+}
+
+/**
+ * 通过行或列获取所涉及到的宫和宫内格的索引
+ */
 function getBoxesAndIndices(rowOrCol: number, isRow: boolean) {
   // 数独宫的大小，3x3
   const boxSize = 3

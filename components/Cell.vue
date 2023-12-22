@@ -181,6 +181,6 @@ function select() {
   @apply flex items-center justify-center rounded-5px
   w-full h-full text-[calc(4vmin)]
   select-none cursor-pointer
-  hover:bg-teal-500 hover:c-white;
+  @hover:bg-teal-500 hover:c-white;
 }
 </style>

@@ -4,6 +4,7 @@ import {
   calculateSelectedCandidates,
   convertStringToSudokuBoxes,
   isValidSudokuString,
+  removeSelectedDigitInCandidates,
 } from '~/utils/sudoku'
 
 // example data
@@ -21,11 +22,15 @@ const sudokuData = ref([
 ])
 
 const blockData = ref(convertStringToSudokuBoxes(sudokuString))
-const highlightDigit = ref(0)
 const isMark = ref(false)
 
 const inputValue = ref('')
+const modalShow = ref(false)
+const showInput = ref(false)
 
+const history = ref([])
+
+const highlightDigit = ref(0)
 const selectedCell = ref({ block: 0, row: 0, col: 0, boxPosition: 0, isOriginal: true })
 const selectedPosition = computed(() => {
   return selectedCell.value
@@ -34,6 +39,28 @@ const selectedPosition = computed(() => {
 onKeyStroke(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], (e) => {
   modifySudoku(Number(e.key))
 })
+
+function recordAction(value) {
+  const valueCopy = JSON.parse(JSON.stringify(value))
+
+  if (history.value.length >= 5)
+    history.value.shift()
+
+  history.value.push(valueCopy)
+}
+
+function undo() {
+  if (history.value.length > 0) {
+    const last = history.value.pop()
+    blockData.value = last
+    resetHighlightDigit()
+  }
+}
+
+function resetHighlightDigit() {
+  highlightDigit.value = 0
+  selectedCell.value = { block: 0, row: 0, col: 0, boxPosition: 0, isOriginal: true }
+}
 
 function onClickBottomNum(num) {
   modifySudoku(num)
@@ -51,15 +78,18 @@ function onClickBottomCandidateNum(num) {
  * @param {number} digit
  */
 function modifyCell({ blockIndex, cellIndex }, digit) {
+  recordAction(blockData.value)
   blockData.value[blockIndex][cellIndex].value = digit
   blockData.value[blockIndex][cellIndex].candidates = []
   highlightDigit.value = digit
+  blockData.value = removeSelectedDigitInCandidates(blockData.value, digit, selectedCell.value)
 }
 
 /**
  * 修改数独数据中的候选数candidates
  */
 function modifyCandidates({ blockIndex, cellIndex }, digit) {
+  recordAction(blockData.value)
   blockData.value[blockIndex][cellIndex].value = 0
   highlightDigit.value = 0
   const arr = blockData.value[blockIndex][cellIndex].candidates
@@ -118,19 +148,86 @@ function onClickCalulateSelectedCandidates() {
   blockData.value = sudokuHasCandidates
 }
 
-function onClickNewGame() {
+function onClickNew() {
+  modalShow.value = true
+}
+
+function onClickInputConfirm() {
   if (isValidSudokuString(inputValue.value)) {
     blockData.value = convertStringToSudokuBoxes(inputValue.value)
-    highlightDigit.value = 0
     isMark.value = false
+    modalShow.value = false
+    showInput.value = false
     inputValue.value = ''
+    resetHighlightDigit()
   }
 }
 </script>
 
 <template>
-  <div class="flex flex-col items-center pt-60px">
+  <div class="flex flex-col items-center pt-30px">
     <div class="w-96vmin flex flex-col items-center sm:w-70vmin">
+      <div class="mb-10px w-full flex items-center justify-between">
+        <div class="flex-center space-x-8px">
+          <DarkToggle />
+          <div
+            class="inline-flex-center cursor-pointer select-none b-1 rounded-5px px-4px py-3px text-[calc(4vmin)] @hover:c-teal-500"
+            i-custom:new
+            @click="onClickNew"
+          />
+          <SudoModal v-model:show="modalShow" title="New">
+            <div class="w-240px flex items-center justify-around">
+              <button
+                class="text-[calc(2vmin)] btn"
+                disabled
+              >
+                生成
+              </button>
+              <button
+                class="text-[calc(2vmin)] btn"
+                @click="showInput = !showInput"
+              >
+                自定义
+              </button>
+            </div>
+            <template v-if="showInput" #action>
+              <div class="w-240px flex items-center justify-around">
+                <input v-model="inputValue" class="w-150px b-1 rounded-5px">
+                <div
+                  class="i-carbon:checkbox-checked text-[calc(2vmin)] icon-btn"
+                  @click="onClickInputConfirm"
+                />
+              </div>
+            </template>
+          </SudoModal>
+        </div>
+        <div class="flex-center space-x-16px">
+          <div
+            class="inline-flex-center cursor-pointer select-none b-1 rounded-5px text-[calc(3vmin)] transition ease-in-out @hover:c-teal-500"
+            :class="[isMark ? 'c-teal-500 i-custom:lock' : 'i-custom:lockopen']"
+            title="锁定标记模式"
+            @click="isMark = !isMark"
+          />
+          <div
+            class="inline-flex-center cursor-pointer select-none b-1 rounded-5px text-[calc(3vmin)] @hover:c-teal-500"
+            i-carbon:edit
+            title="自动计算所有候选数"
+            @click="onClickCalulateCandidates"
+          />
+          <div
+            class="inline-flex-center cursor-pointer select-none b-1 rounded-5px text-[calc(3vmin)] @hover:c-teal-500"
+            i-carbon:pen
+            title="计算选中的候选数"
+            @click="onClickCalulateSelectedCandidates"
+          />
+          <div
+            class="inline-flex-center cursor-pointer select-none b-1 rounded-5px text-[calc(3vmin)] @hover:c-teal-500"
+            i-carbon:undo
+            title="撤回"
+            @click="undo"
+          />
+        </div>
+      </div>
       <div class="relative mb-10px h-0px w-full pt-1/1">
         <div class="sudoku-container dark:bg-gray-500">
           <div
@@ -155,35 +252,7 @@ function onClickNewGame() {
           </div>
         </div>
       </div>
-      <div class="flex-center">
-        <DarkToggle />
-        <input v-model="inputValue" class="b-1 rounded-5px">
-        <div
-          class="ml-5px inline-flex-center cursor-pointer select-none b-1 rounded-5px px-4px py-3px text-[calc(3vmin)]"
-          @click="onClickNewGame"
-        >
-          new
-        </div>
-        <div
-          class="ml-5px inline-flex-center cursor-pointer select-none b-1 rounded-5px px-4px py-3px text-[calc(3vmin)] transition ease-in-out"
-          :class="[isMark ? 'bg-teal-500 c-white' : '']"
-          @click="isMark = !isMark"
-        >
-          mark
-        </div>
-        <div
-          class="ml-5px inline-flex-center cursor-pointer select-none b-1 rounded-5px px-4px py-3px text-[calc(3vmin)]"
-          @click="onClickCalulateCandidates"
-        >
-          auto
-        </div>
-        <div
-          class="ml-5px inline-flex-center cursor-pointer select-none b-1 rounded-5px px-4px py-3px text-[calc(3vmin)]"
-          @click="onClickCalulateSelectedCandidates"
-        >
-          mark selected
-        </div>
-      </div>
+
       <div class="mt-10px w-full flex items-center justify-around">
         <button v-for="i in 9" :key="i" class="digit-btn" @click="onClickBottomNum(i)">
           {{ i }}
