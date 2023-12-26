@@ -15,7 +15,7 @@ function toggleDark() {
 </script>
 
 <template>
-  <button class="text-[calc(3vmin)] !outline-none" @click="toggleDark">
+  <button class="icon-btn" @click="toggleDark">
     <div class="i-carbon-sun dark:i-carbon-moon" />
   </button>
 </template>

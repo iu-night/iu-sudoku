@@ -171,20 +171,20 @@ function onClickInputConfirm() {
         <div class="flex-center space-x-8px">
           <DarkToggle />
           <div
-            class="inline-flex-center cursor-pointer select-none b-1 rounded-5px px-4px py-3px text-[calc(4vmin)] @hover:c-teal-500"
+            class="icon-btn"
             i-custom:new
             @click="onClickNew"
           />
           <SudoModal v-model:show="modalShow" title="New">
             <div class="w-240px flex items-center justify-around">
               <button
-                class="text-[calc(2vmin)] btn"
+                class="text-[calc(4vmin)] btn sm:text-[calc(2vmin)]"
                 disabled
               >
                 生成
               </button>
               <button
-                class="text-[calc(2vmin)] btn"
+                class="text-[calc(4vmin)] btn sm:text-[calc(2vmin)]"
                 @click="showInput = !showInput"
               >
                 自定义
@@ -194,7 +194,7 @@ function onClickInputConfirm() {
               <div class="w-240px flex items-center justify-around">
                 <input v-model="inputValue" class="w-150px b-1 rounded-5px">
                 <div
-                  class="i-carbon:checkbox-checked text-[calc(2vmin)] icon-btn"
+                  class="i-carbon:checkbox-checked icon-btn"
                   @click="onClickInputConfirm"
                 />
               </div>
@@ -203,25 +203,25 @@ function onClickInputConfirm() {
         </div>
         <div class="flex-center space-x-16px">
           <div
-            class="inline-flex-center cursor-pointer select-none b-1 rounded-5px text-[calc(3vmin)] transition ease-in-out @hover:c-teal-500"
+            class="icon-btn"
             :class="[isMark ? 'c-teal-500 i-custom:lock' : 'i-custom:lockopen']"
             title="锁定标记模式"
             @click="isMark = !isMark"
           />
           <div
-            class="inline-flex-center cursor-pointer select-none b-1 rounded-5px text-[calc(3vmin)] @hover:c-teal-500"
+            class="icon-btn"
             i-carbon:edit
             title="自动计算所有候选数"
             @click="onClickCalulateCandidates"
           />
           <div
-            class="inline-flex-center cursor-pointer select-none b-1 rounded-5px text-[calc(3vmin)] @hover:c-teal-500"
+            class="icon-btn"
             i-carbon:pen
             title="计算选中的候选数"
             @click="onClickCalulateSelectedCandidates"
           />
           <div
-            class="inline-flex-center cursor-pointer select-none b-1 rounded-5px text-[calc(3vmin)] @hover:c-teal-500"
+            class="icon-btn"
             i-carbon:undo
             title="撤回"
             @click="undo"
@@ -278,7 +278,7 @@ function onClickInputConfirm() {
 }
 .digit-btn {
   @apply mx-3px flex-center flex-1 cursor-pointer select-none b-1 rounded-5px py-4px
-  text-[calc(3.5vmin)]
+  text-[calc(5vmin)] sm:text-[calc(3.5vmin)]
   active:bg-teal-500 active:c-white;
 }
 </style>

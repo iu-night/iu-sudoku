@@ -18,7 +18,7 @@ body,
   height: 100%;
   margin: 0;
   padding: 0;
-  transition: all 0.3s;
+  transition: background-color 0.3s;
 }
 
 html.dark {

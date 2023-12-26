@@ -153,7 +153,7 @@ function select() {
 </script>
 
 <template>
-  <div class="h-1/3 w-1/3 flex items-center justify-center rounded-5px p-1%">
+  <div class="relative h-1/3 w-1/3 flex items-center justify-center rounded-5px p-1%">
     <div
       class="cell"
       :class="[
@@ -179,8 +179,8 @@ function select() {
 <style>
 .cell {
   @apply flex items-center justify-center rounded-5px
-  w-full h-full text-[calc(4vmin)]
+  w-full h-full text-[calc(6vmin)] sm:text-[calc(4vmin)]
   select-none cursor-pointer
-  @hover:bg-teal-500 hover:c-white;
+  @hover:bg-teal-500 @hover:c-white;
 }
 </style>
