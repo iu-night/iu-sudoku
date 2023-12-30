@@ -1,5 +1,6 @@
 <script setup>
 import { makepuzzle, ratepuzzle, solvepuzzle } from 'sudoku'
+import { useStorage } from '@vueuse/core'
 import {
   calculateCandidates,
   calculateSelectedCandidates,
@@ -27,6 +28,9 @@ const sudokuData = ref([
 // const blockData = ref(convertStringToSudokuBoxes(sudokuString))
 const blockData = ref()
 const isMark = ref(false)
+
+// TODO
+// const localSudoku = useStorage('sudoku')
 
 const inputValue = ref('')
 const modalShow = ref(false)
@@ -142,6 +146,8 @@ function onClickDigit(digit, param) {
  * 计算空格子的候选数
  */
 function onClickCalulateCandidates() {
+  recordAction(blockData.value)
+
   const sudokuHasCandidates = calculateCandidates(blockData.value)
   blockData.value = sudokuHasCandidates
 }
@@ -152,6 +158,7 @@ function onClickCalulateCandidates() {
 function onClickCalulateSelectedCandidates() {
   if (selectedCell.value.isOriginal)
     return
+  recordAction(blockData.value)
   const sudokuHasCandidates = calculateSelectedCandidates(blockData.value, selectedCell.value)
   blockData.value = sudokuHasCandidates
 }
@@ -184,8 +191,15 @@ function generateSudoku() {
 }
 
 onMounted(() => {
+  // TODO
+
+  // if (localSudoku.value) {
+  //   blockData.value = localSudoku.value
+  // }
+  // else {
   const puzzle = makepuzzle()
   blockData.value = rowsToBlocks(toRowArray(puzzle))
+  // }
 })
 </script>
 
@@ -258,7 +272,7 @@ onMounted(() => {
           <div
             v-for="(block, blockIndex) in blockData"
             :key="blockIndex"
-            class="_block w-1/3 flex flex-wrap b-1 b-[#000]:20 dark:b-[#fff]:60"
+            class="_block cafe:b-[#000]:60 w-1/3 flex flex-wrap b-1 b-[#000]:20 dark:b-[#fff]:80"
           >
             <Cell
               v-for="cellData in block"
@@ -299,10 +313,12 @@ onMounted(() => {
 <style>
 .sudoku-container {
   @apply absolute flex flex-wrap items-stretch flex-1 w-full h-full top-0 left-0
-  b-1 b-[#000]:20 dark:b-[#fff]:60 overflow-hidden bg-gray-100;
+  b-1 b-[#000]:20 dark:b-[#fff]:80 cafe:b-[#000]:60 overflow-hidden bg-gray-100;
 }
 .digit-btn {
-  @apply mx-3px flex-center flex-1 cursor-pointer select-none b-1 rounded-5px py-4px
+  @apply mx-3px flex-center flex-1 cursor-pointer select-none
+  b-1 cafe:b-[#433422] cafe:@hover:c-[#158876] cafe:@hover:b-[#158876]
+  rounded-5px py-4px
   text-[calc(5vmin)] sm:text-[calc(3.5vmin)]
   active:bg-teal-500 active:c-white;
 }

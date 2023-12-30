@@ -125,9 +125,9 @@ const digitBgcolor = computed(() => {
   if (isSelected.value || isHighlightDigit.value)
     return 'bg-teal-500 dark:bg-teal-600'
   if (isSameGroup.value)
-    return 'bg-[#eee] dark:bg-[#222]:70'
+    return 'bg-[#eee] dark:bg-[#222]:70 cafe:bg-[#e6d3a8]'
   else
-    return 'bg-[#fff] dark:bg-[#222]:90'
+    return 'bg-[#fff] dark:bg-[#222]:90 cafe:bg-[#f1e7d0]'
 })
 
 function select() {

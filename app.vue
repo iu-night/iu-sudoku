@@ -26,4 +26,8 @@ html.dark {
   background: #222;
   color: white;
 }
+
+html.cafe {
+  background: #f1e7d0;
+}
 </style>

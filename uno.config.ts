@@ -43,4 +43,14 @@ export default defineConfig({
     transformerDirectives(),
     transformerVariantGroup(),
   ],
+  variants: [
+    (matcher) => {
+      if (!matcher.startsWith('cafe:'))
+        return matcher
+      return {
+        matcher: matcher.slice(5),
+        selector: s => `.cafe ${s}`,
+      }
+    },
+  ],
 })
