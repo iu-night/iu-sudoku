@@ -8,7 +8,7 @@ interface Cell {
   candidates: number[]
   boxPosition: number
 }
-type sudokuData = Cell[][]
+export type sudokuData = Cell[][]
 
 /**
  * 通过行和列获取宫的序号
@@ -293,4 +293,49 @@ function getBoxesAndIndices(rowOrCol: number, isRow: boolean) {
   //   ? rowColOffset * boxSize + j
   //   : j * boxSize + rowColOffset)
   // return { boxes, indices }
+}
+
+export function toRowArray(arr: number[]) {
+  const result = []
+  const size = 9 // 子数组的大小
+
+  const modifiedArr = arr.map(item => item === null ? 0 : item + 1)
+
+  for (let i = 0; i < modifiedArr.length; i += size) {
+    const subArray = modifiedArr.slice(i, i + size)
+    result.push(subArray)
+  }
+
+  return result
+}
+
+export function rowsToBlocks(rows: number[][]) {
+  const sudoSize = 9
+  const boxSize = 3
+
+  const blocks: sudokuData = Array.from({ length: sudoSize }, () => [])
+
+  for (let row = 0; row < sudoSize; row++) {
+    for (let col = 0; col < sudoSize; col++) {
+      const value = rows[row][col]
+      const boxIndex = Math.floor(row / boxSize) * boxSize + Math.floor(col / boxSize)
+
+      const boxRow = row % boxSize
+      const boxCol = col % boxSize
+      const boxPosition = boxRow * boxSize + boxCol
+
+      blocks[boxIndex].push({
+        id: `${row + 1}${col + 1}`, // 使用行列生成ID
+        row: row + 1,
+        col: col + 1,
+        block: boxIndex + 1,
+        value,
+        isOriginal: value !== 0, // 若值不为0，则是原始数据
+        candidates: [],
+        boxPosition, // 此格在宫内的序号
+      })
+    }
+  }
+
+  return blocks
 }

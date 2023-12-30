@@ -11,7 +11,7 @@ import {
 
 export default defineConfig({
   shortcuts: [
-    ['btn', 'px-4 py-1 rounded inline-block bg-teal-700 text-white cursor-pointer @hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-gray-600 disabled:hover:bg-gray-600 disabled:opacity-50'],
+    ['btn', 'px-4 py-1 rounded inline-block bg-teal-500 text-white cursor-pointer @hover:bg-teal-600 disabled:cursor-not-allowed disabled:bg-gray-600 disabled:hover:bg-gray-600 disabled:opacity-50'],
     ['icon-btn', 'transition inline-flex-center cursor-pointer select-none text-[calc(5.5vmin)] @hover:c-teal-500 sm:text-[calc(3vmin)]'],
     ['flex-center', 'flex justify-center items-center'],
     ['inline-flex-center', 'inline-flex justify-center items-center'],

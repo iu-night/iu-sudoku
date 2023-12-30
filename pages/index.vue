@@ -1,10 +1,13 @@
 <script setup>
+import { makepuzzle, ratepuzzle, solvepuzzle } from 'sudoku'
 import {
   calculateCandidates,
   calculateSelectedCandidates,
   convertStringToSudokuBoxes,
   isValidSudokuString,
   removeSelectedDigitInCandidates,
+  rowsToBlocks,
+  toRowArray,
 } from '~/utils/sudoku'
 
 // example data
@@ -21,7 +24,8 @@ const sudokuData = ref([
   [0, 0, 0, 0, 8, 0, 0, 7, 9],
 ])
 
-const blockData = ref(convertStringToSudokuBoxes(sudokuString))
+// const blockData = ref(convertStringToSudokuBoxes(sudokuString))
+const blockData = ref()
 const isMark = ref(false)
 
 const inputValue = ref('')
@@ -55,6 +59,10 @@ function undo() {
     blockData.value = last
     resetHighlightDigit()
   }
+}
+
+function resetHistory() {
+  history.value = []
 }
 
 function resetHighlightDigit() {
@@ -160,8 +168,25 @@ function onClickInputConfirm() {
     showInput.value = false
     inputValue.value = ''
     resetHighlightDigit()
+    resetHistory()
   }
 }
+
+function generateSudoku() {
+  const puzzle = makepuzzle()
+  blockData.value = rowsToBlocks(toRowArray(puzzle))
+  isMark.value = false
+  modalShow.value = false
+  showInput.value = false
+  inputValue.value = ''
+  resetHighlightDigit()
+  resetHistory()
+}
+
+onMounted(() => {
+  const puzzle = makepuzzle()
+  blockData.value = rowsToBlocks(toRowArray(puzzle))
+})
 </script>
 
 <template>
@@ -179,7 +204,7 @@ function onClickInputConfirm() {
             <div class="w-240px flex items-center justify-around">
               <button
                 class="text-[calc(4vmin)] btn sm:text-[calc(2vmin)]"
-                disabled
+                @click="generateSudoku"
               >
                 生成
               </button>
