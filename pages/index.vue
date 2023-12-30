@@ -258,7 +258,7 @@ onMounted(() => {
           <div
             v-for="(block, blockIndex) in blockData"
             :key="blockIndex"
-            class="_block w-1/3 flex flex-wrap b-1"
+            class="_block w-1/3 flex flex-wrap b-1 b-[#000]:20 dark:b-[#fff]:60"
           >
             <Cell
               v-for="cellData in block"
@@ -298,8 +298,8 @@ onMounted(() => {
 
 <style>
 .sudoku-container {
-  --uno: absolute flex flex-wrap items-stretch flex-1 w-full h-full top-0 left-0
-    b-1 overflow-hidden bg-gray-100;
+  @apply absolute flex flex-wrap items-stretch flex-1 w-full h-full top-0 left-0
+  b-1 b-[#000]:20 dark:b-[#fff]:60 overflow-hidden bg-gray-100;
 }
 .digit-btn {
   @apply mx-3px flex-center flex-1 cursor-pointer select-none b-1 rounded-5px py-4px
