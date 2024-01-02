@@ -1,5 +1,5 @@
 <script setup>
-import { makepuzzle, ratepuzzle, solvepuzzle } from 'sudoku'
+import sudokuSolver from 'sudoku'
 import { useStorage } from '@vueuse/core'
 import {
   calculateCandidates,
@@ -25,6 +25,8 @@ const sudokuData = ref([
   [0, 0, 0, 0, 8, 0, 0, 7, 9],
 ])
 
+const { makepuzzle, ratepuzzle, solvepuzzle } = sudokuSolver
+
 // const blockData = ref(convertStringToSudokuBoxes(sudokuString))
 const blockData = ref()
 const isMark = ref(false)
@@ -45,6 +47,7 @@ const selectedPosition = computed(() => {
 })
 
 onKeyStroke(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], (e) => {
+  shouldHighlightDigit(num)
   modifySudoku(Number(e.key))
 })
 
@@ -74,11 +77,30 @@ function resetHighlightDigit() {
   selectedCell.value = { block: 0, row: 0, col: 0, boxPosition: 0, isOriginal: true }
 }
 
+function modifyHighlightDigit(num) {
+  highlightDigit.value = num
+}
+
+/**
+ * 判断当前是否应该高亮数字
+ */
+function shouldHighlightDigit(num) {
+  if (highlightDigit.value === num) {
+    modifyHighlightDigit(0)
+    return
+  }
+  const { block, row, col } = selectedCell.value
+  if (block === 0 || row === 0 || col === 0)
+    modifyHighlightDigit(num)
+}
+
 function onClickBottomNum(num) {
+  shouldHighlightDigit(num)
   modifySudoku(num)
 }
 
 function onClickBottomCandidateNum(num) {
+  shouldHighlightDigit(num)
   modifySudoku(num, true)
 }
 
@@ -181,7 +203,9 @@ function onClickInputConfirm() {
 
 function generateSudoku() {
   const puzzle = makepuzzle()
-  blockData.value = rowsToBlocks(toRowArray(puzzle))
+  const puzzleAnswer = solvepuzzle(puzzle)
+  blockData.value = rowsToBlocks(toRowArray(puzzle), toRowArray(puzzleAnswer))
+  // blockData.value = rowsToBlocks(toRowArray(puzzle))
   isMark.value = false
   modalShow.value = false
   showInput.value = false
@@ -198,13 +222,16 @@ onMounted(() => {
   // }
   // else {
   const puzzle = makepuzzle()
-  blockData.value = rowsToBlocks(toRowArray(puzzle))
+  // TODO 判断是否要答案
+  const puzzleAnswer = solvepuzzle(puzzle)
+  blockData.value = rowsToBlocks(toRowArray(puzzle), toRowArray(puzzleAnswer))
+  // blockData.value = rowsToBlocks(toRowArray(puzzle))
   // }
 })
 </script>
 
 <template>
-  <div class="flex flex-col items-center pt-30px">
+  <div class="h-full flex items-center justify-center">
     <div class="w-96vmin flex flex-col items-center sm:w-70vmin">
       <div class="mb-10px w-full flex items-center justify-between">
         <div class="flex-center space-x-8px">
@@ -272,7 +299,7 @@ onMounted(() => {
           <div
             v-for="(block, blockIndex) in blockData"
             :key="blockIndex"
-            class="_block cafe:b-[#000]:60 w-1/3 flex flex-wrap b-1 b-[#000]:20 dark:b-[#fff]:80"
+            class="_block w-1/3 flex flex-wrap b-1 b-[#000]:20 cafe:b-[#000]:60 dark:b-[#fff]:80"
           >
             <Cell
               v-for="cellData in block"
@@ -286,6 +313,7 @@ onMounted(() => {
               :col="cellData.col"
               :isOriginal="cellData.isOriginal"
               :box-position="cellData.boxPosition"
+              :answer="cellData.answer"
               @select="onClickDigit"
             />
           </div>
@@ -319,7 +347,7 @@ onMounted(() => {
   @apply mx-3px flex-center flex-1 cursor-pointer select-none
   b-1 cafe:b-[#433422] cafe:@hover:c-[#158876] cafe:@hover:b-[#158876]
   rounded-5px py-4px
-  text-[calc(5vmin)] sm:text-[calc(3.5vmin)]
+  text-[calc(6vmin)] sm:text-[calc(3.5vmin)]
   active:bg-teal-500 active:c-white;
 }
 </style>

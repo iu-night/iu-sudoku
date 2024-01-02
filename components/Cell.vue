@@ -46,16 +46,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  // 所在行和列
-  // rowCol: {
-  //   type: Object,
-  //   default: () => {
-  //     return {
-  //       row: 0,
-  //       col: 0,
-  //     }
-  //   },
-  // },
+  answer: {
+    type: Number,
+    default: 0,
+  },
 })
 const emit = defineEmits(['select'])
 
@@ -84,19 +78,26 @@ const isSameGroup = computed(() => {
 
 /**
  * 如果同行或同列或同宫中有同样的数字，则出错，样式标红
- * [//TODO) 需要判断当前的数字是否为源数据
+ * 和答案不同时出错 //TODO 设置中添加是否和答案不同时出错
+ * 源数据时不出错
  */
 const isError = computed(() => {
+  if (props.isOriginal)
+    return false
+
   if (props.digit === 0)
     return false
+
+  if (props.digit !== props.answer)
+    return true
 
   if (isSelected.value)
     return false
 
   if (props.digit === props.highlightDigit && isSameGroup.value)
     return true
-  else
-    return false
+
+  return false
 })
 
 const isHighlightDigit = computed(() => {
@@ -178,7 +179,7 @@ function select() {
 
 <style>
 .cell {
-  @apply flex items-center justify-center rounded-5px
+  @apply flex items-center justify-center rounded-2px
   w-full h-full aspect-square text-[calc(6vmin)] sm:text-[calc(4vmin)]
   select-none cursor-pointer
   @hover:bg-teal-500 @hover:c-white;
