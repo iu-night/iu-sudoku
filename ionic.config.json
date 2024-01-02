@@ -1,0 +1,7 @@
+{
+  "name": "iu-sudoku",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "custom"
+}

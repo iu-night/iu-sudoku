@@ -46,16 +46,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  // 所在行和列
-  // rowCol: {
-  //   type: Object,
-  //   default: () => {
-  //     return {
-  //       row: 0,
-  //       col: 0,
-  //     }
-  //   },
-  // },
+  answer: {
+    type: Number,
+    default: 0,
+  },
 })
 const emit = defineEmits(['select'])
 
@@ -90,13 +84,16 @@ const isError = computed(() => {
   if (props.digit === 0)
     return false
 
+  if (props.digit !== props.answer)
+    return true
+
   if (isSelected.value)
     return false
 
   if (props.digit === props.highlightDigit && isSameGroup.value)
     return true
-  else
-    return false
+
+  return false
 })
 
 const isHighlightDigit = computed(() => {

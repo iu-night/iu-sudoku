@@ -1,6 +1,7 @@
 <script setup>
-import { makepuzzle, ratepuzzle, solvepuzzle } from 'sudoku'
+import sudokuSolver from 'sudoku'
 import { useStorage } from '@vueuse/core'
+import { Haptics, ImpactStyle } from '@capacitor/haptics'
 import {
   calculateCandidates,
   calculateSelectedCandidates,
@@ -10,6 +11,12 @@ import {
   rowsToBlocks,
   toRowArray,
 } from '~/utils/sudoku'
+
+const { makepuzzle, ratepuzzle, solvepuzzle } = sudokuSolver
+
+async function hapticsImpactMedium() {
+  await Haptics.impact({ style: ImpactStyle.Medium })
+}
 
 // example data
 const sudokuString = '530070000600195000098000060800060003400803001700020006060000280000419005000080079'
@@ -59,6 +66,8 @@ function recordAction(value) {
 
 function undo() {
   if (history.value.length > 0) {
+    hapticsImpactMedium()
+
     const last = history.value.pop()
     blockData.value = last
     resetHighlightDigit()
@@ -75,10 +84,14 @@ function resetHighlightDigit() {
 }
 
 function onClickBottomNum(num) {
+  hapticsImpactMedium()
+
   modifySudoku(num)
 }
 
 function onClickBottomCandidateNum(num) {
+  hapticsImpactMedium()
+
   modifySudoku(num, true)
 }
 
@@ -137,6 +150,8 @@ function modifySudoku(key, clickCanNum = false) {
 }
 
 function onClickDigit(digit, param) {
+  hapticsImpactMedium()
+
   highlightDigit.value = digit
 
   selectedCell.value = param
@@ -146,6 +161,7 @@ function onClickDigit(digit, param) {
  * 计算空格子的候选数
  */
 function onClickCalulateCandidates() {
+  hapticsImpactMedium()
   recordAction(blockData.value)
 
   const sudokuHasCandidates = calculateCandidates(blockData.value)
@@ -156,6 +172,8 @@ function onClickCalulateCandidates() {
  * 计算选中的空格子的候选数
  */
 function onClickCalulateSelectedCandidates() {
+  hapticsImpactMedium()
+
   if (selectedCell.value.isOriginal)
     return
   recordAction(blockData.value)
@@ -164,11 +182,15 @@ function onClickCalulateSelectedCandidates() {
 }
 
 function onClickNew() {
+  hapticsImpactMedium()
+
   modalShow.value = true
 }
 
 function onClickInputConfirm() {
   if (isValidSudokuString(inputValue.value)) {
+    hapticsImpactMedium()
+
     blockData.value = convertStringToSudokuBoxes(inputValue.value)
     isMark.value = false
     modalShow.value = false
@@ -180,8 +202,12 @@ function onClickInputConfirm() {
 }
 
 function generateSudoku() {
+  hapticsImpactMedium()
+
   const puzzle = makepuzzle()
-  blockData.value = rowsToBlocks(toRowArray(puzzle))
+  const puzzleAnswer = solvepuzzle(puzzle)
+  blockData.value = rowsToBlocks(toRowArray(puzzle), toRowArray(puzzleAnswer))
+  // blockData.value = rowsToBlocks(toRowArray(puzzle))
   isMark.value = false
   modalShow.value = false
   showInput.value = false
@@ -198,13 +224,14 @@ onMounted(() => {
   // }
   // else {
   const puzzle = makepuzzle()
-  blockData.value = rowsToBlocks(toRowArray(puzzle))
+  const puzzleAnswer = solvepuzzle(puzzle)
+  blockData.value = rowsToBlocks(toRowArray(puzzle), toRowArray(puzzleAnswer))
   // }
 })
 </script>
 
 <template>
-  <div class="flex flex-col items-center pt-30px">
+  <div class="flex flex-col items-center pt-130px">
     <div class="w-96vmin flex flex-col items-center sm:w-70vmin">
       <div class="mb-10px w-full flex items-center justify-between">
         <div class="flex-center space-x-8px">
@@ -224,7 +251,10 @@ onMounted(() => {
               </button>
               <button
                 class="text-[calc(4vmin)] btn sm:text-[calc(2vmin)]"
-                @click="showInput = !showInput"
+                @click="() => {
+                  showInput = !showInput;
+                  hapticsImpactMedium()
+                }"
               >
                 自定义
               </button>
@@ -245,7 +275,10 @@ onMounted(() => {
             class="icon-btn"
             :class="[isMark ? 'c-teal-500 i-custom:lock' : 'i-custom:lockopen']"
             title="锁定标记模式"
-            @click="isMark = !isMark"
+            @click="() => {
+              isMark = !isMark;
+              hapticsImpactMedium()
+            }"
           />
           <div
             class="icon-btn"
@@ -272,7 +305,7 @@ onMounted(() => {
           <div
             v-for="(block, blockIndex) in blockData"
             :key="blockIndex"
-            class="_block cafe:b-[#000]:60 w-1/3 flex flex-wrap b-1 b-[#000]:20 dark:b-[#fff]:80"
+            class="_block w-1/3 flex flex-wrap b-1 b-[#000]:20 cafe:b-[#000]:60 dark:b-[#fff]:80"
           >
             <Cell
               v-for="cellData in block"
@@ -286,6 +319,7 @@ onMounted(() => {
               :col="cellData.col"
               :isOriginal="cellData.isOriginal"
               :box-position="cellData.boxPosition"
+              :answer="cellData.answer"
               @select="onClickDigit"
             />
           </div>

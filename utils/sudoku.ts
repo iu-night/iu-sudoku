@@ -7,6 +7,7 @@ interface Cell {
   isOriginal: boolean
   candidates: number[]
   boxPosition: number
+  answer: number
 }
 export type sudokuData = Cell[][]
 
@@ -68,6 +69,7 @@ export function convertStringToSudokuBoxes(sudokuString: string): sudokuData {
         isOriginal: value !== 0, // 若值不为0，则是原始数据
         candidates: [],
         boxPosition, // 此格在宫内的序号
+        answer: 0,
       })
     }
   }
@@ -309,7 +311,7 @@ export function toRowArray(arr: number[]) {
   return result
 }
 
-export function rowsToBlocks(rows: number[][]) {
+export function rowsToBlocks(rows: number[][], answer?: number[][]) {
   const sudoSize = 9
   const boxSize = 3
 
@@ -333,6 +335,7 @@ export function rowsToBlocks(rows: number[][]) {
         isOriginal: value !== 0, // 若值不为0，则是原始数据
         candidates: [],
         boxPosition, // 此格在宫内的序号
+        answer: answer ? answer[row][col] : 0,
       })
     }
   }

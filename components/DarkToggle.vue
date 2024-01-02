@@ -1,4 +1,10 @@
 <script setup lang="ts">
+import { Haptics, ImpactStyle } from '@capacitor/haptics'
+
+async function hapticsImpactMedium() {
+  await Haptics.impact({ style: ImpactStyle.Medium })
+}
+
 const color = useColorMode()
 
 useHead({
@@ -15,7 +21,12 @@ watchEffect(() => color.preference = state.value)
 </script>
 
 <template>
-  <button class="icon-btn" @click="toggleTheme()">
+  <button
+    class="icon-btn" @click="() => {
+      hapticsImpactMedium();
+      toggleTheme()
+    }"
+  >
     <i v-if="state === 'dark'" i-carbon-moon />
     <i v-if="state === 'light'" i-carbon-sun />
     <i v-if="state === 'cafe'" i-carbon-cafe />
