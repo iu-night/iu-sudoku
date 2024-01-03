@@ -1,4 +1,10 @@
 <script setup lang="ts">
+import { Haptics, ImpactStyle } from '@capacitor/haptics'
+
+async function hapticsImpactMedium() {
+  await Haptics.impact({ style: ImpactStyle.Medium })
+}
+
 const color = useColorMode()
 
 const { theme } = storeToRefs(useStore())
@@ -14,6 +20,7 @@ useHead({
 const { state, next } = useCycleList(['dark', 'light', 'cafe', 'system'], { initialValue: theme.value })
 
 function toggleTheme() {
+  hapticsImpactMedium()
   next()
 }
 

@@ -1,6 +1,7 @@
 <script setup>
 import sudokuSolver from 'sudoku'
 import { useStorage } from '@vueuse/core'
+import { Haptics, ImpactStyle } from '@capacitor/haptics'
 import {
   calculateCandidates,
   calculateSelectedCandidates,
@@ -10,6 +11,10 @@ import {
   rowsToBlocks,
   toRowArray,
 } from '~/utils/sudoku'
+
+async function hapticsImpactMedium() {
+  await Haptics.impact({ style: ImpactStyle.Medium })
+}
 
 // example data
 const sudokuString = '530070000600195000098000060800060003400803001700020006060000280000419005000080079'
@@ -50,6 +55,7 @@ const selectedIsError = ref(false)
 const inputValue = ref('')
 const modalShow = ref(false)
 const showInput = ref(false)
+
 const finishModalShow = ref(false)
 
 const highlightDigit = ref(0)
@@ -95,6 +101,8 @@ function recordAction(value) {
  */
 function undo() {
   if (history.value.length > 0) {
+    hapticsImpactMedium()
+
     blockData.value = history.value.pop()
     emptyCells.value = emptyCellsHistory.value.pop()
     mistake.value = mistakeHistory.value.pop()
@@ -138,11 +146,15 @@ function shouldHighlightDigit(num) {
 }
 
 function onClickBottomNum(num) {
+  hapticsImpactMedium()
+
   shouldHighlightDigit(num)
   modifySudoku(num)
 }
 
 function onClickBottomCandidateNum(num) {
+  hapticsImpactMedium()
+
   shouldHighlightDigit(num)
   modifySudoku(num, true)
 }
@@ -247,6 +259,8 @@ function modifySudoku(key, clickCanNum = false) {
 }
 
 function onClickDigit(digit, param) {
+  hapticsImpactMedium()
+
   highlightDigit.value = digit
 
   selectedCell.value = param
@@ -260,6 +274,7 @@ function getIsError(value) {
  * 计算空格子的候选数
  */
 function onClickCalulateCandidates() {
+  hapticsImpactMedium()
   recordAction(blockData.value)
 
   const sudokuHasCandidates = calculateCandidates(blockData.value)
@@ -270,6 +285,8 @@ function onClickCalulateCandidates() {
  * 计算选中的空格子的候选数
  */
 function onClickCalulateSelectedCandidates() {
+  hapticsImpactMedium()
+
   if (selectedCell.value.isOriginal)
     return
   recordAction(blockData.value)
@@ -278,11 +295,15 @@ function onClickCalulateSelectedCandidates() {
 }
 
 function onClickNew() {
+  hapticsImpactMedium()
+
   modalShow.value = true
 }
 
 function onClickInputConfirm() {
   if (isValidSudokuString(inputValue.value)) {
+    hapticsImpactMedium()
+
     resetHistory()
     const { blocks: tempBlcokData, emptyCellsArray: tempCellsArr } = convertStringToSudokuBoxes(inputValue.value)
     setStoreSudokuData(tempBlcokData)
@@ -297,6 +318,8 @@ function onClickInputConfirm() {
 }
 
 function generateSudoku() {
+  hapticsImpactMedium()
+
   resetHistory()
   const puzzle = makepuzzle()
   const puzzleAnswer = solvepuzzle(puzzle)
@@ -351,7 +374,10 @@ watch(isFinish, (value) => {
               </button>
               <button
                 class="text-[calc(4vmin)] btn sm:text-[calc(2vmin)]"
-                @click="showInput = !showInput"
+                @click="() => {
+                  showInput = !showInput;
+                  hapticsImpactMedium()
+                }"
               >
                 自定义
               </button>
@@ -376,6 +402,7 @@ watch(isFinish, (value) => {
                 @click="() => {
                   generateSudoku()
                   finishModalShow = false
+                  hapticsImpactMedium()
                 }"
               >
                 下一局
@@ -389,7 +416,10 @@ watch(isFinish, (value) => {
             class="icon-btn"
             :class="[isMark ? 'c-teal-500 i-custom:lock' : 'i-custom:lockopen']"
             title="锁定标记模式"
-            @click="isMark = !isMark"
+            @click="() => {
+              isMark = !isMark;
+              hapticsImpactMedium()
+            }"
           />
           <div
             v-if="showAllMark"
