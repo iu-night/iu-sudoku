@@ -12,7 +12,7 @@ import {
 export default defineConfig({
   shortcuts: [
     ['btn', 'px-4 py-1 rounded inline-block bg-teal-500 text-white cursor-pointer @hover:bg-teal-600 disabled:cursor-not-allowed disabled:bg-gray-600 disabled:hover:bg-gray-600 disabled:opacity-50'],
-    ['icon-btn', 'transition inline-flex-center cursor-pointer select-none text-[calc(5.5vmin)] @hover:c-teal-500 sm:text-[calc(3vmin)]'],
+    ['icon-btn', 'transition inline-flex-center cursor-pointer select-none text-[calc(5vmin)] @hover:c-teal-500 sm:text-[calc(3vmin)]'],
     ['flex-center', 'flex justify-center items-center'],
     ['inline-flex-center', 'inline-flex justify-center items-center'],
   ],
@@ -20,6 +20,7 @@ export default defineConfig({
     boxShadow: {
       iu: '0 1px 2px -2px rgb(0 0 0 / 8%), 0 3px 6px 0 rgb(0 0 0 / 6%), 0 5px 12px 4px rgb(0 0 0 / 4%)',
       iud: '0 1px 2px -2px rgb(255 255 255 / 8%), 0 3px 6px 0 rgb(255 255 255 / 6%), 0 5px 12px 4px rgb(255 255 255 / 4%)',
+      switch: '0 2px 4px 0 rgba(0, 0, 0, 0.4)',
     },
   },
   presets: [

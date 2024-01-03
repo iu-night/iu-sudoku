@@ -11,6 +11,10 @@
     "postinstall": "nuxi prepare",
     "lint": "eslint ."
   },
+  "dependencies": {
+    "@pinia-plugin-persistedstate/nuxt": "^1.2.0",
+    "@pinia/nuxt": "^0.5.1"
+  },
   "devDependencies": {
     "@antfu/eslint-config": "^2.4.3",
     "@iconify-json/carbon": "^1.1.25",

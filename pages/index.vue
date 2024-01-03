@@ -13,7 +13,7 @@ import {
 
 // example data
 const sudokuString = '530070000600195000098000060800060003400803001700020006060000280000419005000080079'
-const sudokuData = ref([
+const sudokuArray = ref([
   [5, 3, 0, 0, 7, 0, 0, 0, 0],
   [6, 0, 0, 1, 9, 5, 0, 0, 0],
   [0, 9, 8, 0, 0, 0, 0, 6, 0],
@@ -27,54 +27,96 @@ const sudokuData = ref([
 
 const { makepuzzle, ratepuzzle, solvepuzzle } = sudokuSolver
 
-// const blockData = ref(convertStringToSudokuBoxes(sudokuString))
+const store = useStore()
+const {
+  showAllMark,
+  showSelectedMark,
+  showLockMark,
+  showMarkKey,
+  history,
+  sudokuData,
+  emptyCells,
+  isFinish,
+  emptyCellsHistory,
+  mistake,
+  mistakeHistory,
+} = storeToRefs(store)
+
 const blockData = ref()
 const isMark = ref(false)
 
-// TODO
-// const localSudoku = useStorage('sudoku')
+const selectedIsError = ref(false)
 
 const inputValue = ref('')
 const modalShow = ref(false)
 const showInput = ref(false)
-
-const history = ref([])
+const finishModalShow = ref(false)
 
 const highlightDigit = ref(0)
-const selectedCell = ref({ block: 0, row: 0, col: 0, boxPosition: 0, isOriginal: true })
+const selectedCell = ref({
+  block: 0,
+  row: 0,
+  col: 0,
+  digit: 0,
+  boxPosition: 0,
+  isOriginal: true,
+  isError: false,
+})
 const selectedPosition = computed(() => {
   return selectedCell.value
 })
 
 onKeyStroke(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], (e) => {
-  shouldHighlightDigit(num)
+  shouldHighlightDigit(e.key)
   modifySudoku(Number(e.key))
 })
 
+/**
+ * 记录操作步骤
+ */
 function recordAction(value) {
   const valueCopy = JSON.parse(JSON.stringify(value))
+  const emptyCopy = JSON.parse(JSON.stringify(emptyCells.value))
+  const mistakeCopy = JSON.parse(JSON.stringify(mistake.value))
 
-  if (history.value.length >= 5)
+  if (history.value.length >= 5) {
     history.value.shift()
+    emptyCellsHistory.value.shift()
+    mistakeHistory.value.shift()
+  }
 
   history.value.push(valueCopy)
+  emptyCellsHistory.value.push(emptyCopy)
+  mistakeHistory.value.push(mistakeCopy)
 }
 
+/**
+ * 撤回操作
+ */
 function undo() {
   if (history.value.length > 0) {
-    const last = history.value.pop()
-    blockData.value = last
+    blockData.value = history.value.pop()
+    emptyCells.value = emptyCellsHistory.value.pop()
+    mistake.value = mistakeHistory.value.pop()
     resetHighlightDigit()
   }
 }
 
 function resetHistory() {
-  history.value = []
+  store.resetAllSudokuData()
 }
 
 function resetHighlightDigit() {
   highlightDigit.value = 0
-  selectedCell.value = { block: 0, row: 0, col: 0, boxPosition: 0, isOriginal: true }
+  selectedCell.value = {
+    block: 0,
+    row: 0,
+    col: 0,
+    digit: 0,
+    boxPosition: 0,
+    isOriginal: true,
+    isError: false,
+  }
 }
 
 function modifyHighlightDigit(num) {
@@ -85,13 +127,14 @@ function modifyHighlightDigit(num) {
  * 判断当前是否应该高亮数字
  */
 function shouldHighlightDigit(num) {
-  if (highlightDigit.value === num) {
-    modifyHighlightDigit(0)
-    return
-  }
   const { block, row, col } = selectedCell.value
-  if (block === 0 || row === 0 || col === 0)
+  if (block === 0 || row === 0 || col === 0) {
+    if (highlightDigit.value === num) {
+      modifyHighlightDigit(0)
+      return
+    }
     modifyHighlightDigit(num)
+  }
 }
 
 function onClickBottomNum(num) {
@@ -113,8 +156,53 @@ function onClickBottomCandidateNum(num) {
  */
 function modifyCell({ blockIndex, cellIndex }, digit) {
   recordAction(blockData.value)
-  blockData.value[blockIndex][cellIndex].value = digit
-  blockData.value[blockIndex][cellIndex].candidates = []
+
+  // blockData.value[blockIndex][cellIndex].value = digit
+
+  // if (mistake.value.some(v => v.blockIndex === blockIndex && v.cellIndex === cellIndex)) {
+  //   if (!selectedCell.value.isError || digit === 0)
+  //     mistake.value = mistake.value.filter(v => !(v.blockIndex === blockIndex && v.cellIndex === cellIndex))
+  // }
+  // else if (selectedCell.value.isError) {
+  //   mistake.value.push({ blockIndex, cellIndex })
+  // }
+
+  // if (!selectedCell.value.isError && digit !== 0) {
+  //   if (emptyCells.value.some(v => v.blockIndex === blockIndex && v.cellIndex === cellIndex))
+  //     emptyCells.value = emptyCells.value.filter(v => !(v.blockIndex === blockIndex && v.cellIndex === cellIndex))
+  // }
+  // else if (!selectedCell.value.isError && digit === 0) {
+  //   if (!emptyCells.value.some(v => v.blockIndex === blockIndex && v.cellIndex === cellIndex))
+  //     emptyCells.value.push({ blockIndex, cellIndex })
+  // }
+
+  // blockData.value[blockIndex][cellIndex].candidates = []
+  const cell = blockData.value[blockIndex][cellIndex]
+  cell.value = digit
+
+  const mistakeIndex = mistake.value.findIndex(v => v.blockIndex === blockIndex && v.cellIndex === cellIndex)
+  setTimeout(() => {
+    const selectedCellError = selectedIsError.value
+    if (mistakeIndex !== -1) {
+      if (!selectedCellError || digit === 0)
+        mistake.value.splice(mistakeIndex, 1)
+    }
+    else if (selectedCellError) {
+      mistake.value.push({ blockIndex, cellIndex })
+    }
+
+    const emptyCellsIndex = emptyCells.value.findIndex(v => v.blockIndex === blockIndex && v.cellIndex === cellIndex)
+    if (!selectedCellError && digit !== 0) {
+      if (emptyCellsIndex !== -1)
+        emptyCells.value.splice(emptyCellsIndex, 1)
+    }
+    else if (!selectedCellError && digit === 0) {
+      if (emptyCellsIndex === -1)
+        emptyCells.value.push({ blockIndex, cellIndex })
+    }
+  })
+
+  cell.candidates = []
   highlightDigit.value = digit
   blockData.value = removeSelectedDigitInCandidates(blockData.value, digit, selectedCell.value)
 }
@@ -164,6 +252,10 @@ function onClickDigit(digit, param) {
   selectedCell.value = param
 }
 
+function getIsError(value) {
+  selectedIsError.value = value
+}
+
 /**
  * 计算空格子的候选数
  */
@@ -191,42 +283,50 @@ function onClickNew() {
 
 function onClickInputConfirm() {
   if (isValidSudokuString(inputValue.value)) {
-    blockData.value = convertStringToSudokuBoxes(inputValue.value)
+    resetHistory()
+    const { blocks: tempBlcokData, emptyCellsArray: tempCellsArr } = convertStringToSudokuBoxes(inputValue.value)
+    setStoreSudokuData(tempBlcokData)
+    blockData.value = tempBlcokData
+    emptyCells.value = tempCellsArr
     isMark.value = false
     modalShow.value = false
     showInput.value = false
     inputValue.value = ''
     resetHighlightDigit()
-    resetHistory()
   }
 }
 
 function generateSudoku() {
+  resetHistory()
   const puzzle = makepuzzle()
   const puzzleAnswer = solvepuzzle(puzzle)
-  blockData.value = rowsToBlocks(toRowArray(puzzle), toRowArray(puzzleAnswer))
-  // blockData.value = rowsToBlocks(toRowArray(puzzle))
+  const { blocks: tempBlcokData, emptyCellsArray: tempCellsArr } = rowsToBlocks(toRowArray(puzzle), toRowArray(puzzleAnswer))
+  setStoreSudokuData(tempBlcokData)
+  blockData.value = tempBlcokData
+  emptyCells.value = tempCellsArr
   isMark.value = false
   modalShow.value = false
   showInput.value = false
   inputValue.value = ''
   resetHighlightDigit()
-  resetHistory()
+}
+
+function setStoreSudokuData(value) {
+  sudokuData.value = value
 }
 
 onMounted(() => {
-  // TODO
+  if (!isFinish.value)
+    blockData.value = sudokuData.value
+  else
+    generateSudoku()
+})
 
-  // if (localSudoku.value) {
-  //   blockData.value = localSudoku.value
-  // }
-  // else {
-  const puzzle = makepuzzle()
-  // TODO 判断是否要答案
-  const puzzleAnswer = solvepuzzle(puzzle)
-  blockData.value = rowsToBlocks(toRowArray(puzzle), toRowArray(puzzleAnswer))
-  // blockData.value = rowsToBlocks(toRowArray(puzzle))
-  // }
+watch(isFinish, (value) => {
+  if (value) {
+    finishModalShow.value = true
+    resetHighlightDigit()
+  }
 })
 </script>
 
@@ -235,13 +335,13 @@ onMounted(() => {
     <div class="w-96vmin flex flex-col items-center sm:w-70vmin">
       <div class="mb-10px w-full flex items-center justify-between">
         <div class="flex-center space-x-8px">
-          <DarkToggle />
+          <Settings />
           <div
             class="icon-btn"
             i-custom:new
             @click="onClickNew"
           />
-          <SudoModal v-model:show="modalShow" title="New">
+          <SudoModal v-model:show="modalShow" title="新游戏">
             <div class="w-240px flex items-center justify-around">
               <button
                 class="text-[calc(4vmin)] btn sm:text-[calc(2vmin)]"
@@ -266,21 +366,40 @@ onMounted(() => {
               </div>
             </template>
           </SudoModal>
+          <SudoModal v-model:show="finishModalShow" :show-close="false">
+            <div class="w-240px flex flex-col items-center space-y-20px">
+              <div class="text-[calc(4vmin)] sm:text-[calc(2vmin)]">
+                成功🎉
+              </div>
+              <button
+                class="text-[calc(4vmin)] btn sm:text-[calc(2vmin)]"
+                @click="() => {
+                  generateSudoku()
+                  finishModalShow = false
+                }"
+              >
+                下一局
+              </button>
+            </div>
+          </SudoModal>
         </div>
         <div class="flex-center space-x-16px">
           <div
+            v-if="showLockMark"
             class="icon-btn"
             :class="[isMark ? 'c-teal-500 i-custom:lock' : 'i-custom:lockopen']"
             title="锁定标记模式"
             @click="isMark = !isMark"
           />
           <div
+            v-if="showAllMark"
             class="icon-btn"
             i-carbon:edit
             title="自动计算所有候选数"
             @click="onClickCalulateCandidates"
           />
           <div
+            v-if="showSelectedMark"
             class="icon-btn"
             i-carbon:pen
             title="计算选中的候选数"
@@ -295,7 +414,8 @@ onMounted(() => {
         </div>
       </div>
       <div class="relative mb-10px h-0px w-full pt-1/1">
-        <div class="sudoku-container dark:bg-gray-500">
+        <div class="sudoku-container group dark:bg-gray-500">
+          <!-- <span class="absolute right-0 h-150% w-10% translate-x-12 rotate-12 transform bg-white opacity-20 transition-all-3000 -mt-12 group-hover:-translate-x-400" /> -->
           <div
             v-for="(block, blockIndex) in blockData"
             :key="blockIndex"
@@ -315,6 +435,7 @@ onMounted(() => {
               :box-position="cellData.boxPosition"
               :answer="cellData.answer"
               @select="onClickDigit"
+              @getIsError="getIsError"
             />
           </div>
         </div>
@@ -325,7 +446,7 @@ onMounted(() => {
           {{ i }}
         </button>
       </div>
-      <div class="mt-10px w-full flex items-center justify-around">
+      <div v-if="showMarkKey" class="mt-10px w-full flex items-center justify-around">
         <button
           v-for="i in 9" :key="`can${i}`" class="digit-btn italic"
           :class="[isMark ? 'c-teal-500' : '']"
@@ -341,7 +462,7 @@ onMounted(() => {
 <style>
 .sudoku-container {
   @apply absolute flex flex-wrap items-stretch flex-1 w-full h-full top-0 left-0
-  b-1 b-[#000]:20 dark:b-[#fff]:80 cafe:b-[#000]:60 overflow-hidden bg-gray-100;
+  b-1 b-[#000]:20 dark:b-[#fff]:80 cafe:b-[#000]:60 overflow-hidden bg-gray-100 cafe:bg-amber-50;
 }
 .digit-btn {
   @apply mx-3px flex-center flex-1 cursor-pointer select-none

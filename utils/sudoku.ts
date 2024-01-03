@@ -41,11 +41,12 @@ export function getRowColFromBoxIndex(boxIndex: number, cellIndex: number) {
 /**
  * 将字符串转换为数独数据 以宫为单位
  * @param sudokuString 数独字符串
- * @returns {sudokuData} 以宫为单位的数独数据
  */
-export function convertStringToSudokuBoxes(sudokuString: string): sudokuData {
+export function convertStringToSudokuBoxes(sudokuString: string) {
   const sudoSize = 9
   const boxSize = 3
+  const emptyCellsArray = []
+
   const boxes: sudokuData = Array.from({ length: sudoSize }, () => [])
 
   // 将字符串转换为一个包含值的数组
@@ -54,11 +55,16 @@ export function convertStringToSudokuBoxes(sudokuString: string): sudokuData {
   for (let row = 0; row < sudoSize; row++) {
     for (let col = 0; col < sudoSize; col++) {
       const value = values[row * sudoSize + col]
+      const isOriginal = value !== 0
+
       const boxIndex = Math.floor(row / boxSize) * boxSize + Math.floor(col / boxSize)
 
       const boxRow = row % boxSize
       const boxCol = col % boxSize
       const boxPosition = boxRow * boxSize + boxCol
+
+      if (!isOriginal)
+        emptyCellsArray.push({ blockIndex: boxIndex, cellIndex: boxPosition })
 
       boxes[boxIndex].push({
         id: `${row + 1}${col + 1}`, // 使用行列生成ID
@@ -66,15 +72,14 @@ export function convertStringToSudokuBoxes(sudokuString: string): sudokuData {
         col: col + 1,
         block: boxIndex + 1,
         value,
-        isOriginal: value !== 0, // 若值不为0，则是原始数据
+        isOriginal, // 若值不为0，则是原始数据
         candidates: [],
         boxPosition, // 此格在宫内的序号
         answer: 0,
       })
     }
   }
-  // console.log('🚀  boxes:', JSON.stringify(boxes))
-  return boxes
+  return { blocks: boxes, emptyCellsArray }
 }
 
 /**
@@ -174,6 +179,7 @@ export function removeSelectedDigitInCandidates(
     col: number
     boxPosition: number
     isOriginal: boolean
+    isError?: boolean
   },
 ) {
   if (!sudo) {
@@ -297,6 +303,9 @@ function getBoxesAndIndices(rowOrCol: number, isRow: boolean) {
   // return { boxes, indices }
 }
 
+/**
+ * 数组数据转换成以行为单位的二维数组
+ */
 export function toRowArray(arr: number[]) {
   const result = []
   const size = 9 // 子数组的大小
@@ -311,20 +320,30 @@ export function toRowArray(arr: number[]) {
   return result
 }
 
+/**
+ * 把以行为单位的二维数组转换成以宫为单位的二维数组
+ */
 export function rowsToBlocks(rows: number[][], answer?: number[][]) {
   const sudoSize = 9
   const boxSize = 3
+  // 源数据中的空格数量
+  const emptyCellsArray = []
 
   const blocks: sudokuData = Array.from({ length: sudoSize }, () => [])
 
   for (let row = 0; row < sudoSize; row++) {
     for (let col = 0; col < sudoSize; col++) {
       const value = rows[row][col]
+      const isOriginal = value !== 0
+
       const boxIndex = Math.floor(row / boxSize) * boxSize + Math.floor(col / boxSize)
 
       const boxRow = row % boxSize
       const boxCol = col % boxSize
       const boxPosition = boxRow * boxSize + boxCol
+
+      if (!isOriginal)
+        emptyCellsArray.push({ blockIndex: boxIndex, cellIndex: boxPosition })
 
       blocks[boxIndex].push({
         id: `${row + 1}${col + 1}`, // 使用行列生成ID
@@ -332,7 +351,7 @@ export function rowsToBlocks(rows: number[][], answer?: number[][]) {
         col: col + 1,
         block: boxIndex + 1,
         value,
-        isOriginal: value !== 0, // 若值不为0，则是原始数据
+        isOriginal, // 若值不为0，则是原始数据
         candidates: [],
         boxPosition, // 此格在宫内的序号
         answer: answer ? answer[row][col] : 0,
@@ -340,5 +359,5 @@ export function rowsToBlocks(rows: number[][], answer?: number[][]) {
     }
   }
 
-  return blocks
+  return { blocks, emptyCellsArray }
 }

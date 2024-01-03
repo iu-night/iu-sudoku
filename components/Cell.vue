@@ -51,7 +51,9 @@ const props = defineProps({
     default: 0,
   },
 })
-const emit = defineEmits(['select'])
+const emit = defineEmits(['select', 'getIsError'])
+
+const { showMistake } = storeToRefs(useStore())
 
 const isSelected = computed(() => {
   return (
@@ -78,7 +80,7 @@ const isSameGroup = computed(() => {
 
 /**
  * 如果同行或同列或同宫中有同样的数字，则出错，样式标红
- * 和答案不同时出错 //TODO 设置中添加是否和答案不同时出错
+ * 和答案不同时出错(需判断设置中是否开启显示错误)
  * 源数据时不出错
  */
 const isError = computed(() => {
@@ -88,7 +90,7 @@ const isError = computed(() => {
   if (props.digit === 0)
     return false
 
-  if (props.digit !== props.answer)
+  if (showMistake.value && props.digit !== props.answer)
     return true
 
   if (isSelected.value)
@@ -137,8 +139,10 @@ function select() {
       block: 0,
       row: 0,
       col: 0,
+      digit: 0,
       boxPosition: 0,
       isOriginal: true,
+      isError: false,
     })
   }
   else {
@@ -146,11 +150,17 @@ function select() {
       block: props.box,
       row: props.row,
       col: props.col,
+      digit: props.digit,
       boxPosition: props.boxPosition,
       isOriginal: props.isOriginal,
+      isError: isError.value,
     })
   }
 }
+
+watch(() => props.digit, () => {
+  emit('getIsError', isError.value)
+})
 </script>
 
 <template>
@@ -182,6 +192,6 @@ function select() {
   @apply flex items-center justify-center rounded-2px
   w-full h-full aspect-square text-[calc(6vmin)] sm:text-[calc(4vmin)]
   select-none cursor-pointer
-  @hover:bg-teal-500 @hover:c-white;
+  @hover:bg-teal-500 dark:@hover:bg-teal-600 @hover:c-white;
 }
 </style>
