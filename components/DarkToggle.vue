@@ -7,6 +7,8 @@ async function hapticsImpactMedium() {
 
 const color = useColorMode()
 
+const { theme } = storeToRefs(useStore())
+
 useHead({
   meta: [{
     id: 'theme-color',
@@ -15,18 +17,21 @@ useHead({
   }],
 })
 
-const { state, next: toggleTheme } = useCycleList(['dark', 'light', 'cafe', 'system'], { initialValue: 'system' })
+const { state, next } = useCycleList(['dark', 'light', 'cafe', 'system'], { initialValue: theme.value })
 
-watchEffect(() => color.preference = state.value)
+function toggleTheme() {
+  hapticsImpactMedium()
+  next()
+}
+
+watchEffect(() => {
+  color.preference = state.value
+  theme.value = state.value
+})
 </script>
 
 <template>
-  <button
-    class="icon-btn" @click="() => {
-      hapticsImpactMedium();
-      toggleTheme()
-    }"
-  >
+  <button class="icon-btn" @click="toggleTheme">
     <i v-if="state === 'dark'" i-carbon-moon />
     <i v-if="state === 'light'" i-carbon-sun />
     <i v-if="state === 'cafe'" i-carbon-cafe />

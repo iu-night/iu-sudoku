@@ -18,6 +18,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  showClose: {
+    type: Boolean,
+    default: true,
+  },
 })
 const emit = defineEmits(['update:show'])
 
@@ -37,7 +41,7 @@ function close() {
       <div v-if="show" class="iu-modal-mask">
         <div class="iu-modal-wrapper" @click.stop="maskClose">
           <div class="iu-modal-container" @click.stop>
-            <div class="iu-modal-close" @click.stop="close">
+            <div v-if="showClose" class="iu-modal-close" @click.stop="close">
               <div i-carbon-close />
             </div>
             <div v-if="$slots.header || title" class="iu-modal-header">
@@ -70,7 +74,7 @@ function close() {
 
 .iu-modal-container {
   @apply flex flex-col relative rounded-4px text-16px text-gray-700
-  dark:text-gray-200 bg-white dark:bg-[#222] transition-300 shadow-iu dark:shadow-iud;
+  dark:text-gray-200 bg-white dark:bg-[#222] cafe:bg-[#f1e7d0] transition-300 shadow-iu dark:shadow-iud;
 }
 
 .iu-modal-close {
@@ -95,7 +99,7 @@ function close() {
 }
 
 .iu-modal-action {
-  @apply flex-1 rounded-4px px-30px py-20px bg-[#efefef] dark:bg-[#424242];
+  @apply flex-1 rounded-4px px-30px py-20px bg-[#efefef] dark:bg-[#424242] cafe:bg-amber-50;
 }
 
 .iu-modal-enter-from,

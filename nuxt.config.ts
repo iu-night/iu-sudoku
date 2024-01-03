@@ -8,12 +8,15 @@ export default defineNuxtConfig({
   },
   imports: {
     autoImport: true,
+    dirs: ['stores'],
   },
   modules: [
     '@unocss/nuxt',
     '@vueuse/nuxt',
     '@nuxtjs/color-mode',
     '@vite-pwa/nuxt',
+    '@pinia/nuxt',
+    '@pinia-plugin-persistedstate/nuxt',
   ],
   css: [
     '@unocss/reset/tailwind.css',

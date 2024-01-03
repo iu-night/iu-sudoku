@@ -20,6 +20,7 @@ body,
   padding: 0;
   transition: background-color 0.3s;
   overscroll-behavior: none;
+  touch-action: manipulation;
 }
 
 html.dark {
