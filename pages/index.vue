@@ -128,13 +128,12 @@ function modifyHighlightDigit(num) {
  */
 function shouldHighlightDigit(num) {
   const { block, row, col } = selectedCell.value
-  if (block === 0 || row === 0 || col === 0) {
-    if (highlightDigit.value === num) {
-      modifyHighlightDigit(0)
-      return
-    }
-    modifyHighlightDigit(num)
+  if (highlightDigit.value === num) {
+    modifyHighlightDigit(0)
+    return
   }
+  if (block === 0 || row === 0 || col === 0)
+    modifyHighlightDigit(num)
 }
 
 function onClickBottomNum(num) {
@@ -245,6 +244,7 @@ function modifySudoku(key, clickCanNum = false) {
       cellIndex: selectedCell.value.boxPosition,
     }, key)
   }
+  setStoreSudokuData(blockData.value)
 }
 
 function onClickDigit(digit, param) {
