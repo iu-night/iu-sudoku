@@ -42,6 +42,7 @@ const className = computed(() => {
 })
 
 function handleClick() {
+  hapticsImpactMedium()
   if (props.disabled)
     return
   if (value.value)

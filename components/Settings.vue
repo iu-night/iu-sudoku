@@ -3,6 +3,7 @@ const { showAllMark, showSelectedMark, showLockMark, showMarkKey, showMistake } 
 
 const showSetting = ref(false)
 function openSettings() {
+  hapticsImpactMedium()
   showSetting.value = true
 }
 </script>

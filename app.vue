@@ -28,6 +28,10 @@ html.dark {
   color: white;
 }
 
+html.light {
+  background: #fbfbfb;
+}
+
 html.cafe {
   background: #f1e7d0;
 }

@@ -128,9 +128,9 @@ const digitBgcolor = computed(() => {
   if (isSelected.value || isHighlightDigit.value)
     return 'bg-teal-500 dark:bg-teal-600'
   if (isSameGroup.value)
-    return 'bg-[#eee] dark:bg-[#222]:70 cafe:bg-[#e6d3a8]'
+    return 'bg-[#eee] dark:bg-[#000] cafe:bg-[#e6d3a8]'
   else
-    return 'bg-[#fff] dark:bg-[#222]:90 cafe:bg-[#f1e7d0]'
+    return 'bg-[#fff] dark:bg-[#222] cafe:bg-[#f1e7d0]'
 })
 
 function select() {
@@ -142,7 +142,6 @@ function select() {
       digit: 0,
       boxPosition: 0,
       isOriginal: true,
-      isError: false,
     })
   }
   else {
@@ -153,7 +152,6 @@ function select() {
       digit: props.digit,
       boxPosition: props.boxPosition,
       isOriginal: props.isOriginal,
-      isError: isError.value,
     })
   }
 }

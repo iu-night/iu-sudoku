@@ -1,7 +1,5 @@
 <script setup>
 import sudokuSolver from 'sudoku'
-import { useStorage } from '@vueuse/core'
-import { Haptics, ImpactStyle } from '@capacitor/haptics'
 import {
   calculateCandidates,
   calculateSelectedCandidates,
@@ -11,12 +9,6 @@ import {
   rowsToBlocks,
   toRowArray,
 } from '~/utils/sudoku'
-
-const { makepuzzle, ratepuzzle, solvepuzzle } = sudokuSolver
-
-async function hapticsImpactMedium() {
-  await Haptics.impact({ style: ImpactStyle.Medium })
-}
 
 // example data
 const sudokuString = '530070000600195000098000060800060003400803001700020006060000280000419005000080079'
@@ -67,7 +59,6 @@ const selectedCell = ref({
   digit: 0,
   boxPosition: 0,
   isOriginal: true,
-  isError: false,
 })
 const selectedPosition = computed(() => {
   return selectedCell.value
@@ -124,7 +115,6 @@ function resetHighlightDigit() {
     digit: 0,
     boxPosition: 0,
     isOriginal: true,
-    isError: false,
   }
 }
 
@@ -261,8 +251,8 @@ function modifySudoku(key, clickCanNum = false) {
 
 function onClickDigit(digit, param) {
   hapticsImpactMedium()
-
-  highlightDigit.value = digit
+  if (digit !== 0 || param?.block === 0)
+    highlightDigit.value = digit
 
   selectedCell.value = param
 }
@@ -469,12 +459,12 @@ watch(isFinish, (value) => {
         </div>
       </div>
 
-      <div class="mt-10px w-full flex items-center justify-around">
+      <div class="mt-10px w-full flex items-center justify-around space-x-5px">
         <button v-for="i in 9" :key="i" class="digit-btn" @click="onClickBottomNum(i)">
           {{ i }}
         </button>
       </div>
-      <div v-if="showMarkKey" class="mt-10px w-full flex items-center justify-around">
+      <div v-if="showMarkKey" class="mt-10px w-full flex items-center justify-around space-x-5px">
         <button
           v-for="i in 9" :key="`can${i}`" class="digit-btn italic"
           :class="[isMark ? 'c-teal-500' : '']"
@@ -490,13 +480,15 @@ watch(isFinish, (value) => {
 <style>
 .sudoku-container {
   @apply absolute flex flex-wrap items-stretch flex-1 w-full h-full top-0 left-0
-  b-1 b-[#000]:20 dark:b-[#fff]:80 cafe:b-[#000]:60 overflow-hidden bg-gray-100 cafe:bg-amber-50;
+  shadow dark:shadow-[#fff]:10
+  b-1 b-[#000]:20 dark:b-[#fff]:80 cafe:b-[#000]:60 overflow-hidden bg-gray-100 dark:bg-zinc-900 cafe:bg-amber-50;
 }
 .digit-btn {
-  @apply mx-3px flex-center flex-1 cursor-pointer select-none
-  b-1 cafe:b-[#433422] cafe:@hover:c-[#158876] cafe:@hover:b-[#158876]
-  rounded-5px py-4px
-  text-[calc(6vmin)] sm:text-[calc(3.5vmin)]
+  @apply flex-center flex-1 cursor-pointer select-none
+  cafe:b-[#433422] cafe:@hover:c-[#158876] cafe:@hover:b-[#158876]
+  shadow dark:shadow-[#fff]:10
+  rounded-5px py-3px sm:py-4px
+  text-[calc(8vmin)] sm:text-[calc(3.5vmin)]
   active:bg-teal-500 active:c-white;
 }
 </style>
