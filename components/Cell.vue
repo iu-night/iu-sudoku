@@ -12,6 +12,11 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
+  // 选中的数字
+  selectedDigit: {
+    type: Number,
+    default: 0,
+  },
   // 选中的数字在数独中的位置
   selectedPosition: {
     type: Object,
@@ -96,7 +101,7 @@ const isError = computed(() => {
   if (isSelected.value)
     return false
 
-  if (props.digit === props.highlightDigit && isSameGroup.value)
+  if (props.digit === props.selectedDigit && isSameGroup.value)
     return true
 
   return false

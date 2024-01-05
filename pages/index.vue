@@ -52,6 +52,7 @@ const showInput = ref(false)
 const finishModalShow = ref(false)
 
 const highlightDigit = ref(0)
+const selectedDigit = ref(0)
 const selectedCell = ref({
   block: 0,
   row: 0,
@@ -108,6 +109,7 @@ function resetHistory() {
 
 function resetHighlightDigit() {
   highlightDigit.value = 0
+  selectedDigit.value = 0
   selectedCell.value = {
     block: 0,
     row: 0,
@@ -127,13 +129,12 @@ function modifyHighlightDigit(num) {
  */
 function shouldHighlightDigit(num) {
   const { block, row, col } = selectedCell.value
-  if (block === 0 || row === 0 || col === 0) {
-    if (highlightDigit.value === num) {
-      modifyHighlightDigit(0)
-      return
-    }
-    modifyHighlightDigit(num)
+  if (highlightDigit.value === num) {
+    modifyHighlightDigit(0)
+    return
   }
+  if (block === 0 || row === 0 || col === 0)
+    modifyHighlightDigit(num)
 }
 
 function onClickBottomNum(num) {
@@ -207,6 +208,7 @@ function modifyCell({ blockIndex, cellIndex }, digit) {
 
   cell.candidates = []
   highlightDigit.value = digit
+  selectedDigit.value = digit
   blockData.value = removeSelectedDigitInCandidates(blockData.value, digit, selectedCell.value)
 }
 
@@ -216,7 +218,7 @@ function modifyCell({ blockIndex, cellIndex }, digit) {
 function modifyCandidates({ blockIndex, cellIndex }, digit) {
   recordAction(blockData.value)
   blockData.value[blockIndex][cellIndex].value = 0
-  highlightDigit.value = 0
+  selectedDigit.value = 0
   const arr = blockData.value[blockIndex][cellIndex].candidates
   if (arr.includes(digit)) {
     arr.splice(arr.indexOf(digit), 1)
@@ -247,6 +249,7 @@ function modifySudoku(key, clickCanNum = false) {
       cellIndex: selectedCell.value.boxPosition,
     }, key)
   }
+  setStoreSudokuData(blockData.value)
 }
 
 function onClickDigit(digit, param) {
@@ -254,6 +257,7 @@ function onClickDigit(digit, param) {
   if (digit !== 0 || param?.block === 0)
     highlightDigit.value = digit
 
+  selectedDigit.value = digit
   selectedCell.value = param
 }
 
@@ -444,6 +448,7 @@ watch(isFinish, (value) => {
               :key="cellData.id"
               :digit="cellData.value"
               :highlight-digit="highlightDigit"
+              :selected-digit="selectedDigit"
               :selected-position="selectedPosition"
               :candidates="cellData.candidates"
               :box="blockIndex + 1"
