@@ -156,26 +156,6 @@ function onClickBottomCandidateNum(num) {
 function modifyCell({ blockIndex, cellIndex }, digit) {
   recordAction(blockData.value)
 
-  // blockData.value[blockIndex][cellIndex].value = digit
-
-  // if (mistake.value.some(v => v.blockIndex === blockIndex && v.cellIndex === cellIndex)) {
-  //   if (!selectedCell.value.isError || digit === 0)
-  //     mistake.value = mistake.value.filter(v => !(v.blockIndex === blockIndex && v.cellIndex === cellIndex))
-  // }
-  // else if (selectedCell.value.isError) {
-  //   mistake.value.push({ blockIndex, cellIndex })
-  // }
-
-  // if (!selectedCell.value.isError && digit !== 0) {
-  //   if (emptyCells.value.some(v => v.blockIndex === blockIndex && v.cellIndex === cellIndex))
-  //     emptyCells.value = emptyCells.value.filter(v => !(v.blockIndex === blockIndex && v.cellIndex === cellIndex))
-  // }
-  // else if (!selectedCell.value.isError && digit === 0) {
-  //   if (!emptyCells.value.some(v => v.blockIndex === blockIndex && v.cellIndex === cellIndex))
-  //     emptyCells.value.push({ blockIndex, cellIndex })
-  // }
-
-  // blockData.value[blockIndex][cellIndex].candidates = []
   const cell = blockData.value[blockIndex][cellIndex]
   cell.value = digit
 
@@ -213,7 +193,6 @@ function modifyCell({ blockIndex, cellIndex }, digit) {
 function modifyCandidates({ blockIndex, cellIndex }, digit) {
   recordAction(blockData.value)
   blockData.value[blockIndex][cellIndex].value = 0
-  selectedDigit.value = 0
   const arr = blockData.value[blockIndex][cellIndex].candidates
   if (arr.includes(digit)) {
     arr.splice(arr.indexOf(digit), 1)
@@ -230,8 +209,11 @@ function modifyCandidates({ blockIndex, cellIndex }, digit) {
 function modifySudoku(key, clickCanNum = false) {
   if (selectedCell.value.block === 0)
     return
-  if (selectedCell.value.isOriginal)
+  if (selectedCell.value.isOriginal) {
+    if (key === selectedDigit.value)
+      resetHighlightDigit()
     return
+  }
   if (isMark.value || clickCanNum) {
     modifyCandidates({
       blockIndex: selectedCell.value.block - 1,
@@ -239,10 +221,15 @@ function modifySudoku(key, clickCanNum = false) {
     }, key)
   }
   else {
-    modifyCell({
-      blockIndex: selectedCell.value.block - 1,
-      cellIndex: selectedCell.value.boxPosition,
-    }, key)
+    if (key !== selectedDigit.value) {
+      modifyCell({
+        blockIndex: selectedCell.value.block - 1,
+        cellIndex: selectedCell.value.boxPosition,
+      }, key)
+    }
+    else {
+      resetHighlightDigit()
+    }
   }
   setStoreSudokuData(blockData.value)
 }
