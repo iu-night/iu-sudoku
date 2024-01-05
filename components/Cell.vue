@@ -142,7 +142,6 @@ function select() {
       digit: 0,
       boxPosition: 0,
       isOriginal: true,
-      isError: false,
     })
   }
   else {
@@ -153,7 +152,6 @@ function select() {
       digit: props.digit,
       boxPosition: props.boxPosition,
       isOriginal: props.isOriginal,
-      isError: isError.value,
     })
   }
 }

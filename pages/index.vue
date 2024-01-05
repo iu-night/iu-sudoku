@@ -60,7 +60,6 @@ const selectedCell = ref({
   digit: 0,
   boxPosition: 0,
   isOriginal: true,
-  isError: false,
 })
 const selectedPosition = computed(() => {
   return selectedCell.value
@@ -115,7 +114,6 @@ function resetHighlightDigit() {
     digit: 0,
     boxPosition: 0,
     isOriginal: true,
-    isError: false,
   }
 }
 
@@ -247,7 +245,8 @@ function modifySudoku(key, clickCanNum = false) {
 }
 
 function onClickDigit(digit, param) {
-  highlightDigit.value = digit
+  if (digit !== 0 || param?.block === 0)
+    highlightDigit.value = digit
 
   selectedCell.value = param
 }
