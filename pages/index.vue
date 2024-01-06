@@ -125,11 +125,15 @@ function modifyHighlightDigit(num) {
 
 /**
  * 判断当前是否应该高亮数字
+ * @param {number} num 当前输入的数字
+ * @param {boolean} isInputMark 是否是标记数字（输入候选数）
  */
-function shouldHighlightDigit(num) {
+function shouldHighlightDigit(num, isInputMark = false) {
   const { block, row, col } = selectedCell.value
-  if (highlightDigit.value === num) {
-    modifyHighlightDigit(0)
+  const isMarkLock = isMark.value
+  if (highlightDigit.value === num && !isInputMark) {
+    if (!isMarkLock)
+      modifyHighlightDigit(0)
     return
   }
   if (block === 0 || row === 0 || col === 0)
@@ -142,7 +146,7 @@ function onClickBottomNum(num) {
 }
 
 function onClickBottomCandidateNum(num) {
-  shouldHighlightDigit(num)
+  shouldHighlightDigit(num, true)
   modifySudoku(num, true)
 }
 
