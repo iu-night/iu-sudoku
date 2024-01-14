@@ -1,5 +1,5 @@
 <script setup>
-const { showAllMark, showSelectedMark, showLockMark, showMarkKey, showMistake } = storeToRefs(useStore())
+const { showAllMark, showSelectedMark, showLockMark, showMarkKey, showMistake, showEraseAllMark } = storeToRefs(useStore())
 
 const showSetting = ref(false)
 function openSettings() {
@@ -28,6 +28,10 @@ function openSettings() {
         <div class="flex items-center justify-between">
           <span class="text-[calc(4vmin)] sm:text-[calc(2vmin)]">选中标记</span>
           <SudoSwitch v-model="showSelectedMark" />
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-[calc(4vmin)] sm:text-[calc(2vmin)]">清空所有标记</span>
+          <SudoSwitch v-model="showEraseAllMark" />
         </div>
         <div class="flex items-center justify-between">
           <span class="text-[calc(4vmin)] sm:text-[calc(2vmin)]">显示锁定标记</span>

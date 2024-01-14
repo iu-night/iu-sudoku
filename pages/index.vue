@@ -33,6 +33,7 @@ const {
   showSelectedMark,
   showLockMark,
   showMarkKey,
+  showEraseAllMark,
   history,
   sudokuData,
   emptyCells,
@@ -251,6 +252,16 @@ function getIsError(value) {
 }
 
 /**
+ * 清空所有标记
+ */
+function onClickEraseAllMark() {
+  recordAction(blockData.value)
+
+  blockData.value = eraseAllMark(blockData.value)
+  setStoreSudokuData(blockData.value)
+}
+
+/**
  * 计算空格子的候选数
  */
 function onClickCalulateCandidates() {
@@ -258,6 +269,7 @@ function onClickCalulateCandidates() {
 
   const sudokuHasCandidates = calculateCandidates(blockData.value)
   blockData.value = sudokuHasCandidates
+  setStoreSudokuData(blockData.value)
 }
 
 /**
@@ -269,6 +281,7 @@ function onClickCalulateSelectedCandidates() {
   recordAction(blockData.value)
   const sudokuHasCandidates = calculateSelectedCandidates(blockData.value, selectedCell.value)
   blockData.value = sudokuHasCandidates
+  setStoreSudokuData(blockData.value)
 }
 
 function onClickNew() {
@@ -386,17 +399,24 @@ watch(isFinish, (value) => {
             @click="isMark = !isMark"
           />
           <div
+            v-if="showEraseAllMark"
+            class="icon-btn"
+            i-carbon:erase
+            title="清空所有标记"
+            @click="onClickEraseAllMark"
+          />
+          <div
             v-if="showAllMark"
             class="icon-btn"
             i-carbon:edit
-            title="自动计算所有候选数"
+            title="自动标记所有候选数"
             @click="onClickCalulateCandidates"
           />
           <div
             v-if="showSelectedMark"
             class="icon-btn"
             i-carbon:pen
-            title="计算选中的候选数"
+            title="标记选中的候选数"
             @click="onClickCalulateSelectedCandidates"
           />
           <div

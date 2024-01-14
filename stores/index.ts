@@ -9,6 +9,7 @@ export const useStore = defineStore({
     showSelectedMark: true,
     showLockMark: true,
     showMarkKey: true,
+    showEraseAllMark: true,
     emptyCells: [],
     mistake: [],
     history: [],

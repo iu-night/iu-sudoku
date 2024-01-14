@@ -168,6 +168,21 @@ export function calculateSelectedCandidates(
 }
 
 /**
+ * 清空所有标记（候选数）
+ */
+export function eraseAllMark(sudo: sudokuData) {
+  if (!sudo)
+    return
+
+  sudo.forEach((block) => {
+    block.forEach((cell) => {
+      cell.candidates = []
+    })
+  })
+  return sudo
+}
+
+/**
  * 去掉选中的格子所在行、列、宫中的此格子数字的候选数
  */
 export function removeSelectedDigitInCandidates(
